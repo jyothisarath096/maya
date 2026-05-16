@@ -1,0 +1,20 @@
+{
+  "maya_app_id": "net_parser",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f40000",
+  "reentrancy_guard_addr": "0x47f4f000",
+  "scratch_addr": "0x47ff8000",
+  "inject_return_vaddr": "0x47f40060",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCshEG6WohzJtj_10net_parser12mrt_net_main",
+      "vaddr": "0x43000000",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "maya_app_id": "mrt_shell",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f90000",
+  "reentrancy_guard_addr": "0x47f9f000",
+  "scratch_addr": "0x48008000",
+  "inject_return_vaddr": "0x47f90000",
+  "intent_registry": []
+}

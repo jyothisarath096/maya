@@ -1,0 +1,11 @@
+[package]
+name = "mrt_shell"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "mrt_shell"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

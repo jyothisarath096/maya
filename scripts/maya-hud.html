@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Maya OS — Intent Canvas</title>
+<style>
+  :root {
+    --bg: #050607;
+    --red: #ff342f;
+    --red-soft: rgba(255, 52, 47, 0.55);
+    --red-faint: rgba(255, 52, 47, 0.18);
+    --red-glow: rgba(255, 52, 47, 0.10);
+    --white: #f3f5ef;
+    --text: rgba(235, 239, 235, 0.84);
+    --text-dim: rgba(205, 213, 210, 0.45);
+    --text-faint: rgba(205, 213, 210, 0.22);
+    --panel-line: rgba(220, 226, 224, 0.13);
+    --grid: rgba(210, 220, 216, 0.075);
+    --font-main: "Inter", Arial, sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, monospace;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(circle at 84% 10%, rgba(255, 47, 42, 0.38), transparent 27%),
+      radial-gradient(circle at 93% 55%, rgba(255, 42, 36, 0.22), transparent 19%),
+      linear-gradient(120deg, #030405 0%, #090b0d 44%, #050506 100%);
+    color: var(--text);
+    font-family: var(--font-main);
+    letter-spacing: 0.01em;
+  }
+
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  body::before {
+    z-index: 20;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.025) 0px 1px,
+      transparent 1px 5px
+    );
+    opacity: 0.23;
+    mix-blend-mode: screen;
+  }
+
+  body::after {
+    z-index: 19;
+    background: radial-gradient(circle at 82% 14%, rgba(255, 44, 38, 0.35), transparent 28%);
+    filter: blur(28px);
+  }
+
+  .hud-shell {
+    position: relative;
+    z-index: 5;
+    width: 1280px;
+    height: 800px;
+    padding: 16px 20px 18px;
+    display: grid;
+    grid-template-columns: 320px 1fr 240px;
+    grid-template-rows: 44px 1fr 160px;
+    gap: 12px;
+  }
+
+  .panel,
+  .subpanel,
+  .shell-panel,
+  .card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel,
+  .subpanel {
+    background: linear-gradient(180deg, rgba(18, 20, 23, 0.72), rgba(9, 10, 12, 0.72));
+    border: 1px solid var(--panel-line);
+    box-shadow: inset 0 0 42px rgba(255, 255, 255, 0.025);
+  }
+
+  .panel::before,
+  .subpanel::before,
+  .shell-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 44px 44px;
+    opacity: 0.68;
+  }
+
+  .topbar {
+    grid-column: 1 / 4;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .topbar > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .topbar .left-copy {
+    font: 700 11px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .topbar .center-copy {
+    text-align: center;
+    font: 600 11px var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .topbar .right-copy {
+    text-align: right;
+    font: 700 11px var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .topbar .right-copy .status-live {
+    color: var(--red);
+  }
+
+  .panel-title,
+  .subpanel-title {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    z-index: 2;
+    font: 700 10px var(--font-mono);
+    letter-spacing: 0.12em;
+    color: var(--white);
+    text-transform: uppercase;
+  }
+
+  .left-panel {
+    grid-column: 1;
+    grid-row: 2 / 4;
+    padding: 32px 0 0;
+  }
+
+  .topology-container {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 320px;
+    bottom: 24px;
+    padding-top: 8px;
+    box-sizing: border-box;
+  }
+
+  .topology-legend {
+    display: none;
+  }
+
+  .core-legend-item {
+    display: grid;
+    gap: 5px;
+    justify-items: center;
+    font: 700 8px var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .core-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  .topology-map {
+    position: absolute;
+    top: 8px;
+    left: 0;
+    width: 320px;
+    height: 700px;
+  }
+
+  .topology-bands {
+    display: none;
+  }
+
+  .topology-band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .topology-band span {
+    position: absolute;
+    top: -6px;
+    left: 0;
+    padding-right: 8px;
+    background: linear-gradient(90deg, rgba(9, 10, 12, 0.96), rgba(9, 10, 12, 0));
+    font: 700 8px var(--font-mono);
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.15);
+    text-transform: uppercase;
+  }
+
+  .topology-canvas {
+    position: absolute;
+    inset: 0;
+    width: 320px;
+    height: 700px;
+    pointer-events: none;
+  }
+
+  .topology-nodes {
+    display: none;
+  }
+
+  .topology-node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    display: block;
+    border-radius: 3px;
+    border: 2px solid var(--node-color, rgba(255, 255, 255, 0.22));
+    background: rgba(10, 12, 14, 0.88);
+    box-shadow:
+      inset 0 0 16px rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(255, 255, 255, 0.04);
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  }
+
+  .topology-node.ipc-active {
+    box-shadow:
+      0 0 10px color-mix(in srgb, var(--node-color, rgba(255,255,255,0.3)) 70%, transparent),
+      0 0 22px color-mix(in srgb, var(--node-color, rgba(255,255,255,0.3)) 35%, transparent),
+      inset 0 0 16px rgba(255, 255, 255, 0.03);
+  }
+
+  .topology-node.ipc-active::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--node-color, rgba(255,255,255,0.3)) 75%, transparent);
+    opacity: 0;
+    animation: topo-pulse 1.2s ease-out infinite;
+  }
+
+  .node-body {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .node-inner {
+    position: relative;
+    width: 60%;
+    height: 60%;
+    border: 1px solid color-mix(in srgb, var(--node-color, rgba(255,255,255,0.3)) 70%, transparent);
+    background: color-mix(in srgb, var(--node-color, rgba(255,255,255,0.16)) var(--fill-alpha, 20%), rgba(10,12,14,0.9));
+    box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+  }
+
+  .node-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--node-color, rgba(255, 255, 255, 0.3));
+    box-shadow: 0 0 10px color-mix(in srgb, var(--node-color, rgba(255,255,255,0.3)) 55%, transparent);
+  }
+
+  .node-meta {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 6px);
+    width: 120px;
+  }
+
+  .node-meta-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .core-chip {
+    min-width: 20px;
+    padding: 1px 4px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    font: 700 8px var(--font-mono);
+    letter-spacing: 0.08em;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .node-name {
+    font: 700 9px var(--font-mono);
+    color: rgba(235, 239, 235, 0.72);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .node-pid {
+    margin-top: 4px;
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .topology-node.dimmed {
+    opacity: 0.68;
+  }
+
+  .topology-node.dimmed .node-name {
+    color: rgba(205, 213, 210, 0.44);
+  }
+
+  .left-footer {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .left-footer .topology-counts {
+    text-align: right;
+  }
+
+  .center-panel {
+    grid-column: 2;
+    grid-row: 2;
+    padding: 34px 0 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .core-ring-wrap {
+    position: relative;
+    width: min(46vw, 520px);
+    aspect-ratio: 1;
+  }
+
+  .core-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background:
+      radial-gradient(circle, rgba(255, 255, 255, 0.08) 0 1px, transparent 2px) center / 13px 13px,
+      radial-gradient(circle, transparent 0 31%, rgba(255, 52, 47, 0.12) 31.1% 31.9%, transparent 32%),
+      radial-gradient(circle, transparent 0 53%, rgba(255, 255, 255, 0.22) 53.1% 53.8%, transparent 54%),
+      radial-gradient(circle, rgba(255, 255, 255, 0.06), transparent 60%);
+  }
+
+  .core-ring::before {
+    content: "";
+    position: absolute;
+    inset: 11%;
+    border-radius: 50%;
+    border: 1px solid var(--red-soft);
+    box-shadow: 0 0 28px rgba(255, 52, 47, 0.18);
+  }
+
+  .core-ring::after {
+    content: "";
+    position: absolute;
+    width: 24%;
+    aspect-ratio: 1;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 58%);
+    box-shadow: 0 0 32px var(--red-glow);
+  }
+
+  .spoke-layer,
+  .dot-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  .spoke-layer {
+    animation: spin-cw 20s linear infinite;
+  }
+
+  .spoke {
+    position: absolute;
+    width: 4px;
+    height: 10px;
+    border-radius: 999px;
+    left: 50%;
+    top: 50%;
+    transform-origin: 50% 0%;
+    background: rgba(236, 240, 232, 0.42);
+    opacity: 0.42;
+  }
+
+  .dot-layer.rt { animation: spin-cw 20s linear infinite; }
+  .dot-layer.cpu { animation: spin-ccw 30s linear infinite; }
+  .dot-layer.io { animation: spin-cw 45s linear infinite; }
+  .dot-layer.bg { animation: spin-ccw 60s linear infinite; }
+
+  .ring-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(243, 245, 239, 0.28);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02);
+    transition: background 200ms ease, opacity 200ms ease, box-shadow 200ms ease;
+  }
+
+  .ring-dot.red {
+    background: var(--red);
+    box-shadow: 0 0 10px rgba(255, 52, 47, 0.35);
+  }
+
+  .ring-dot.white {
+    background: rgba(243, 245, 239, 0.62);
+  }
+
+  .ring-dot.dim {
+    background: rgba(243, 245, 239, 0.18);
+  }
+
+  .ring-dot.faint {
+    background: rgba(243, 245, 239, 0.1);
+  }
+
+  .core-ring-caption {
+    position: absolute;
+    left: 50%;
+    bottom: -18px;
+    transform: translateX(-50%);
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .right-stack {
+    grid-column: 3;
+    grid-row: 2 / 4;
+    display: grid;
+    grid-template-rows: 1.1fr 0.9fr 1fr;
+    gap: 10px;
+  }
+
+  .subpanel {
+    padding: 32px 14px 12px;
+  }
+
+  .metric-rows {
+    display: grid;
+    gap: 11px;
+    margin-top: 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 32px;
+    gap: 8px;
+    align-items: center;
+    font: 700 9px var(--font-mono);
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .metric-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+  }
+
+  .metric-bar > span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--red), rgba(255, 255, 255, 0.75));
+    box-shadow: 0 0 8px var(--red-soft);
+  }
+
+  .sparkline {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 10px;
+    height: 72px;
+    z-index: 2;
+  }
+
+  .stats-grid {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 7px;
+    column-gap: 16px;
+    margin-top: 6px;
+    font: 700 8px var(--font-mono);
+    text-transform: uppercase;
+  }
+
+  .stats-grid .label {
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+  }
+
+  .stats-grid .value {
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  .stats-grid .value.alert {
+    color: var(--red);
+  }
+
+  .sub-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 12px 0 10px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .file-list {
+    display: grid;
+    gap: 7px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .file-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .file-row.active {
+    color: var(--red);
+  }
+
+  .weight-wrap {
+    position: relative;
+    z-index: 2;
+    margin-top: 10px;
+  }
+
+  .weight-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .weight-number {
+    font: 900 32px var(--font-mono);
+    color: var(--red);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .weight-meta {
+    display: grid;
+    gap: 4px;
+    padding-top: 2px;
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .weight-meta .delta.neg,
+  .weight-meta .online {
+    color: var(--red);
+  }
+
+  .mini-bars {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+    align-items: end;
+    z-index: 2;
+  }
+
+  .mini-core {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+
+  .mini-core .bar {
+    width: 8px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .mini-core .bar > span {
+    display: block;
+    width: 100%;
+    height: 0;
+    background: var(--red);
+  }
+
+  .mini-core .label {
+    font: 600 7px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+  }
+
+  .bottom-panel {
+    grid-column: 2;
+    grid-row: 3;
+    display: grid;
+    grid-template-rows: 64px 1fr;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+  }
+
+  .card {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card .label {
+    font: 700 7px var(--font-mono);
+    color: var(--text-faint);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .card .value {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    font: 900 15px var(--font-mono);
+    color: var(--text);
+  }
+
+  .card.hot {
+    box-shadow: inset 0 0 20px rgba(255, 52, 47, 0.08);
+  }
+
+  .card.hot .label,
+  .card.hot .value {
+    color: var(--red);
+  }
+
+  .shell-panel {
+    background: rgba(6, 7, 8, 0.85);
+    border: 1px solid var(--panel-line);
+    border-top: 1px solid rgba(255, 52, 47, 0.3);
+    min-height: 0;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .shell-panel.active {
+    border-color: rgba(255, 52, 47, 0.7);
+    box-shadow: 0 0 0 1px rgba(255, 52, 47, 0.18), inset 0 0 28px rgba(255, 52, 47, 0.05);
+  }
+
+  .shell-header {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font: 700 8px var(--font-mono);
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    position: relative;
+    z-index: 2;
+  }
+
+  .shell-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .shell-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .shell-dot.red {
+    background: var(--red);
+  }
+
+  .shell-hint {
+    margin-left: auto;
+  }
+
+  .shell-body {
+    padding: 9px 12px 10px;
+    font: 10px var(--font-mono);
+    color: var(--text-faint);
+    display: grid;
+    gap: 7px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .shell-entry {
+    display: grid;
+    gap: 3px;
+  }
+
+  .shell-command {
+    color: var(--text-dim);
+  }
+
+  .shell-prompt {
+    color: var(--red);
+  }
+
+  .shell-intent-prefix {
+    color: var(--red);
+  }
+
+  .shell-output {
+    padding-left: 14px;
+    color: var(--text-faint);
+    white-space: pre-wrap;
+    line-height: 1.35;
+  }
+
+  .shell-output.intent-response {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .intent-pending .shell-output {
+    color: rgba(255, 255, 255, 0.48);
+    animation: intent-pulse 1s ease-in-out infinite;
+  }
+
+  .shell-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-dim);
+  }
+
+  .shell-cursor {
+    width: 6px;
+    height: 11px;
+    background: var(--red);
+    animation: blink 1s steps(1, end) infinite;
+  }
+
+  .status-pill {
+    position: fixed;
+    right: 10px;
+    bottom: 8px;
+    z-index: 30;
+    font: 700 9px var(--font-mono);
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  @keyframes spin-cw {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes spin-ccw {
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  @keyframes intent-pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.85; }
+  }
+
+  @keyframes topo-pulse {
+    0% {
+      opacity: 0.7;
+      transform: scale(0.96);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.18);
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="hud-shell">
+    <div class="topbar">
+      <div class="left-copy">MAYA / KERNEL HUD / LIVE PROCESS FIELD</div>
+      <div class="center-copy">INTENT CANVAS · AI-NATIVE KERNEL · AArch64 SMP</div>
+      <div class="right-copy">SYS STATUS <span id="tickText">0</span> · <span class="status-live">ACTIVE</span></div>
+    </div>
+
+    <section class="panel left-panel">
+      <div class="panel-title">Process Topology</div>
+      <div id="topology" class="topology-container">
+        <div id="coreLegend" class="topology-legend"></div>
+        <div class="topology-map">
+          <div class="topology-bands">
+            <div class="topology-band" style="top:80px;"><span>Realtime</span></div>
+            <div class="topology-band" style="top:240px;"><span>Compute</span></div>
+            <div class="topology-band" style="top:360px;"><span>IO</span></div>
+            <div class="topology-band" style="top:550px;"><span>Background</span></div>
+          </div>
+          <canvas id="topologyCanvas" class="topology-canvas"></canvas>
+          <div id="topologyNodes" class="topology-nodes"></div>
+        </div>
+      </div>
+      <div class="left-footer">
+        <span>relay graph / kernel object map</span>
+        <span id="topologyTotals" class="topology-counts">CORES 0–7 · 0 PROC · SND 0 · RCV 0</span>
+      </div>
+    </section>
+
+    <section class="panel center-panel">
+      <div class="panel-title">Maya Kernel Swarm</div>
+      <div class="core-ring-wrap">
+        <div class="core-ring"></div>
+        <div id="spokeLayer" class="spoke-layer"></div>
+        <div id="dotRt" class="dot-layer rt"></div>
+        <div id="dotCpu" class="dot-layer cpu"></div>
+        <div id="dotIo" class="dot-layer io"></div>
+        <div id="dotBg" class="dot-layer bg"></div>
+        <div class="core-ring-caption">processes inside kernel — live intent field</div>
+      </div>
+    </section>
+
+    <section class="right-stack">
+      <div class="subpanel">
+        <div class="subpanel-title">Scheduler Load</div>
+        <div class="metric-rows" id="metricRows"></div>
+        <svg id="sparkline" class="sparkline" viewBox="0 0 210 72" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div class="subpanel">
+        <div class="subpanel-title">IPC / MayaFS</div>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="sub-divider"></div>
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <div class="subpanel">
+        <div class="subpanel-title">PPO Weights</div>
+        <div class="weight-wrap">
+          <div class="weight-main">
+            <div id="weightNumber" class="weight-number">376</div>
+            <div class="weight-meta">
+              <span>OUT_W SUM</span>
+              <span>INIT: 376</span>
+              <span id="weightDelta" class="delta">DELTA: 0</span>
+              <span class="online">■ ONLINE</span>
+            </div>
+          </div>
+        </div>
+        <div id="miniBars" class="mini-bars"></div>
+      </div>
+    </section>
+
+    <section class="bottom-panel">
+      <div id="cardsRow" class="cards-row"></div>
+      <div id="shellPanel" class="shell-panel">
+        <div class="shell-header">
+          <div class="shell-dots">
+            <span class="shell-dot red"></span>
+            <span class="shell-dot"></span>
+            <span class="shell-dot"></span>
+          </div>
+          <span>// MAYA SHELL</span>
+          <span class="shell-hint">press / to focus</span>
+        </div>
+        <div id="shellBody" class="shell-body"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="status" class="status-pill">CONNECTING...</div>
+
+<script>
+(() => {
+  const fallbackState = {
+    t: 0,
+    p: [],
+    r: [0, 0, 0, 0, 0, 0, 0, 0],
+    w: 376,
+    d: 0,
+    fs: [],
+  };
+
+  const stateHolder = {
+    ws: null,
+    state: null,
+    rewardHistory: [],
+    shell_history: [],
+    shell_active: false,
+    current_input: "",
+    pendingShellIndex: -1,
+    intentPending: false,
+  };
+
+  const LIVE = {
+    rewards: [0, 0, 0, 0, 0, 0, 0, 0],
+    ipcRate: 0,
+    marLoad: 0,
+    fsLoad: 0,
+    tick: 0,
+    processes: [],
+    prevIpc: 0,
+    prevFs: 0,
+    prevIpcByPid: {},
+    activePids: new Set(),
+    time: 0,
+  };
+
+  const nodeLayout = {
+    10: { x: 110, y: 65 },
+    11: { x: 22, y: 120 },
+    12: { x: 22, y: 190 },
+    4: { x: 130, y: 262 },
+    7: { x: 228, y: 308 },
+    5: { x: 88, y: 382 },
+    8: { x: 210, y: 420 },
+    13: { x: 32, y: 462 },
+    14: { x: 138, y: 500 },
+    6: { x: 108, y: 568 },
+    9: { x: 218, y: 612 },
+  };
+
+  const BANDS = [
+    { y: 42, label: "REALTIME" },
+    { y: 238, label: "COMPUTE" },
+    { y: 358, label: "IO" },
+    { y: 538, label: "BACKGROUND" },
+  ];
+
+  const shortNames = {
+    mrt_producer: "MRT_PROD",
+    mrt_consumer: "MRT_CONS",
+    mrt_hello: "MRT_HELLO",
+    mrt_logger: "MRT_LOG",
+    compute: "COMPUTE",
+    io: "IO_WORK",
+    bg: "BG_TASK",
+    background: "BG_TASK",
+    matrix: "MATRIX",
+    net_parser: "NET_PARSE",
+    sort_suite: "SORT",
+    mrt_shell: "SHELL",
+  };
+
+  const metricConfig = [
+    { key: "ppo", label: "PPO AI" },
+    { key: "ipc", label: "IPC" },
+    { key: "mar", label: "MAR" },
+    { key: "fs", label: "MayaFS" },
+  ];
+
+  const cardConfig = [
+    { key: "irq", label: "IRQ" },
+    { key: "svc", label: "SVC" },
+    { key: "tick", label: "TICK" },
+    { key: "mrt", label: "MRT" },
+    { key: "pan", label: "PAN" },
+    { key: "ipc", label: "IPC" },
+    { key: "cores", label: "CORES" },
+    { key: "ppo", label: "PPO" },
+  ];
+
+  const topologyCanvasEl = document.getElementById("topologyCanvas");
+  const tickTextEl = document.getElementById("tickText");
+  const topologyTotalsEl = document.getElementById("topologyTotals");
+  const metricRowsEl = document.getElementById("metricRows");
+  const sparklineEl = document.getElementById("sparkline");
+  const statsGridEl = document.getElementById("statsGrid");
+  const fileListEl = document.getElementById("fileList");
+  const weightNumberEl = document.getElementById("weightNumber");
+  const weightDeltaEl = document.getElementById("weightDelta");
+  const miniBarsEl = document.getElementById("miniBars");
+  const cardsRowEl = document.getElementById("cardsRow");
+  const statusEl = document.getElementById("status");
+  const spokeLayerEl = document.getElementById("spokeLayer");
+  const dotRtEl = document.getElementById("dotRt");
+  const dotCpuEl = document.getElementById("dotCpu");
+  const dotIoEl = document.getElementById("dotIo");
+  const dotBgEl = document.getElementById("dotBg");
+  const shellPanelEl = document.getElementById("shellPanel");
+  const shellBodyEl = document.getElementById("shellBody");
+
+  const spokeEls = [];
+  const dotRings = {
+    rt: [],
+    cpu: [],
+    io: [],
+    bg: [],
+  };
+  const cardEls = new Map();
+  const miniBarEls = [];
+  let dashOffset = 0;
+
+  function prettyName(name = "") {
+    const raw = String(name || "").toLowerCase();
+    if (raw === "bg" || raw === "background" || raw === "background_task") return "BG";
+    if (raw === "io" || raw === "io_workload") return "IO";
+    if (raw === "net_parser") return "NET";
+    const cleaned = raw
+      .replace("mrt_", "")
+      .replace("_workload", "")
+      .replace("_task", "")
+      .replace("_suite", "")
+      .replace("_multiply", "")
+      .replace("_parser", "");
+    return cleaned.toUpperCase().slice(0, 12);
+  }
+
+  function getState() {
+    return stateHolder.state || fallbackState;
+  }
+
+  function totalBy(key) {
+    return (getState().p || []).reduce((sum, proc) => sum + (proc[key] || 0), 0);
+  }
+
+  function abbreviate(value) {
+    const n = Number(value) || 0;
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+    return `${n}`;
+  }
+
+  function ensureSpokes() {
+    for (let i = 0; i < 42; i += 1) {
+      const spoke = document.createElement("div");
+      spoke.className = "spoke";
+      spokeLayerEl.appendChild(spoke);
+      spokeEls.push(spoke);
+    }
+  }
+
+  function positionDots(container, count, radiusPct, store) {
+    for (let i = 0; i < count; i += 1) {
+      const dot = document.createElement("div");
+      dot.className = "ring-dot dim";
+      const angle = (Math.PI * 2 * i) / count;
+      const x = 50 + Math.cos(angle) * radiusPct;
+      const y = 50 + Math.sin(angle) * radiusPct;
+      dot.style.left = `calc(${x}% - 2px)`;
+      dot.style.top = `calc(${y}% - 2px)`;
+      container.appendChild(dot);
+      store.push(dot);
+    }
+  }
+
+  function ensureDots() {
+    positionDots(dotRtEl, 42, 18, dotRings.rt);
+    positionDots(dotCpuEl, 74, 28, dotRings.cpu);
+    positionDots(dotIoEl, 106, 39, dotRings.io);
+    positionDots(dotBgEl, 138, 49, dotRings.bg);
+  }
+
+  function ensureMetrics() {
+    metricConfig.forEach((metric) => {
+      const row = document.createElement("div");
+      row.className = "metric-row";
+      row.dataset.metric = metric.key;
+      row.innerHTML = `
+        <span>${metric.label}</span>
+        <div class="metric-bar"><span></span></div>
+        <strong>0%</strong>
+      `;
+      metricRowsEl.appendChild(row);
+    });
+  }
+
+  function ensureMiniBars() {
+    for (let i = 0; i < 8; i += 1) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "mini-core";
+      wrapper.innerHTML = `
+        <div class="bar"><span></span></div>
+        <span class="label">C${i}</span>
+      `;
+      miniBarsEl.appendChild(wrapper);
+      miniBarEls.push(wrapper);
+    }
+  }
+
+  function ensureCards() {
+    cardConfig.forEach((card) => {
+      const el = document.createElement("div");
+      el.className = "card";
+      el.dataset.card = card.key;
+      el.innerHTML = `
+        <div class="label">${card.label}</div>
+        <div class="value">0</div>
+      `;
+      cardsRowEl.appendChild(el);
+      cardEls.set(card.key, el);
+    });
+  }
+
+  function updateTopbar() {
+    const state = getState();
+    tickTextEl.textContent = Number(state.t || 0).toLocaleString();
+  }
+
+  function resizeTopologyCanvas() {
+    const ratio = window.devicePixelRatio || 1;
+    const width = 320;
+    const height = 700;
+    topologyCanvasEl.style.width = `${width}px`;
+    topologyCanvasEl.style.height = `${height}px`;
+    if (topologyCanvasEl.width !== Math.round(width * ratio) || topologyCanvasEl.height !== Math.round(height * ratio)) {
+      topologyCanvasEl.width = Math.round(width * ratio);
+      topologyCanvasEl.height = Math.round(height * ratio);
+    }
+    const ctx = topologyCanvasEl.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return ctx;
+  }
+
+  function drawBandGuides(ctx) {
+    ctx.save();
+    BANDS.forEach((band) => {
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(10, band.y);
+      ctx.lineTo(310, band.y);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,0.13)";
+      ctx.font = '700 7px "JetBrains Mono", monospace';
+      ctx.textAlign = "left";
+      ctx.fillText(`── ${band.label}`, 10, band.y - 3);
+    });
+    ctx.restore();
+  }
+
+  function drawCoreLegend(ctx) {
+    const coreColors = {
+      0: "#FF3333",
+      1: "#FF3333",
+      2: "rgba(255,255,255,0.35)",
+      3: "rgba(255,255,255,0.35)",
+      4: "rgba(255,255,255,0.20)",
+      5: "rgba(255,255,255,0.35)",
+      6: "rgba(255,255,255,0.35)",
+      7: "rgba(255,255,255,0.20)",
+    };
+    ctx.save();
+    for (let i = 0; i < 8; i += 1) {
+      const x = 20 + i * 36;
+      const y = 18;
+      ctx.fillStyle = coreColors[i];
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,0.30)";
+      ctx.font = "7px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`C${i}`, x, y + 13);
+    }
+    ctx.restore();
+  }
+
+  function drawNode(ctx, x, y, proc, isActive, isBg) {
+    const S = 36;
+    const C = 6;
+    const cx = x + S / 2;
+    const cy = y + S / 2;
+    const col = isActive
+      ? "#FF3333"
+      : proc.id === 14
+        ? "rgba(255,255,255,0.85)"
+        : isBg
+          ? "rgba(255,255,255,0.28)"
+          : "rgba(255,255,255,0.62)";
+
+    function chamferPath(ox, oy, size, chamfer) {
+      ctx.beginPath();
+      ctx.moveTo(ox + chamfer, oy);
+      ctx.lineTo(ox + size - chamfer, oy);
+      ctx.lineTo(ox + size, oy + chamfer);
+      ctx.lineTo(ox + size, oy + size - chamfer);
+      ctx.lineTo(ox + size - chamfer, oy + size);
+      ctx.lineTo(ox + chamfer, oy + size);
+      ctx.lineTo(ox, oy + size - chamfer);
+      ctx.lineTo(ox, oy + chamfer);
+      ctx.closePath();
+    }
+
+    if (isActive) {
+      const g = ctx.createRadialGradient(cx, cy, 14, cx, cy, 30);
+      g.addColorStop(0, "rgba(255,51,51,0.22)");
+      g.addColorStop(1, "rgba(255,51,51,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(x - 10, y - 10, S + 20, S + 20);
+    }
+
+    chamferPath(x, y, S, C);
+    ctx.fillStyle = isActive ? "rgba(255,30,30,0.10)" : "rgba(255,255,255,0.03)";
+    ctx.fill();
+
+    chamferPath(x, y, S, C);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = isActive ? 1.5 : 1;
+    if (isBg && !isActive) {
+      ctx.setLineDash([2, 3]);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const I = 4;
+    chamferPath(x + I, y + I, S - I * 2, Math.max(C - 1, 2));
+    ctx.strokeStyle = isActive ? "rgba(255,51,51,0.35)" : "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const ticks = [
+      [cx - 3, y - 1, cx + 3, y - 1],
+      [cx - 3, y + S + 1, cx + 3, y + S + 1],
+      [x - 1, cy - 3, x - 1, cy + 3],
+      [x + S + 1, cy - 3, x + S + 1, cy + 3],
+    ];
+    ctx.strokeStyle = isActive ? "rgba(255,51,51,0.60)" : "rgba(255,255,255,0.20)";
+    ctx.lineWidth = 1;
+    ticks.forEach(([x1, y1, x2, y2]) => {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    });
+
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = isActive
+      ? "#ffffff"
+      : proc.id === 14
+        ? "rgba(255,255,255,0.80)"
+        : isBg
+          ? "rgba(255,255,255,0.28)"
+          : "rgba(255,255,255,0.55)";
+    ctx.font = 'bold 7px "JetBrains Mono", "Courier New", monospace';
+    ctx.textAlign = "center";
+    const raw = (proc.n || "").toLowerCase();
+    const label = raw
+      .replace("mrt_", "")
+      .replace("_workload", "")
+      .replace("_task", "")
+      .replace("_suite", "")
+      .replace("_multiply", "")
+      .replace("_parser", "")
+      .toUpperCase();
+    ctx.fillText(label, cx, y + S + 12);
+
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.font = "6px monospace";
+    ctx.textAlign = "right";
+    ctx.fillText(`C${proc.k ?? "?"} ${proc.id}`, x + S, y - 3);
+  }
+
+  function drawIPCLines(ctx, processes, offset) {
+    const pairs = [
+      [11, 12],
+      [11, 13],
+      [12, 10],
+      [13, 14],
+    ];
+    const byPid = {};
+    processes.forEach((proc) => {
+      byPid[proc.id] = proc;
+    });
+
+    pairs.forEach(([srcId, dstId]) => {
+      const srcPos = nodeLayout[srcId];
+      const dstPos = nodeLayout[dstId];
+      if (!srcPos || !dstPos) return;
+
+      const srcProc = byPid[srcId];
+      const isActive = !!(srcProc && (srcProc._delta > 0));
+      const sx = srcPos.x + 18;
+      const sy = srcPos.y + 18;
+      const dx = dstPos.x + 18;
+      const dy = dstPos.y + 18;
+
+      ctx.strokeStyle = isActive ? "rgba(255,51,51,0.75)" : "rgba(255,51,51,0.20)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 5]);
+      ctx.lineDashOffset = -offset;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(dx, dy);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const angle = Math.atan2(dy - sy, dx - sx);
+      const arrowLen = 6;
+      ctx.fillStyle = isActive ? "rgba(255,51,51,0.75)" : "rgba(255,51,51,0.20)";
+      ctx.beginPath();
+      ctx.moveTo(dx, dy);
+      ctx.lineTo(
+        dx - arrowLen * Math.cos(angle - 0.4),
+        dy - arrowLen * Math.sin(angle - 0.4),
+      );
+      ctx.lineTo(
+        dx - arrowLen * Math.cos(angle + 0.4),
+        dy - arrowLen * Math.sin(angle + 0.4),
+      );
+      ctx.closePath();
+      ctx.fill();
+    });
+  }
+
+  function renderTopology() {
+    const ctx = resizeTopologyCanvas();
+    ctx.clearRect(0, 0, 320, 700);
+    const processes = LIVE.processes || [];
+    drawBandGuides(ctx);
+    drawCoreLegend(ctx);
+    drawIPCLines(ctx, processes, dashOffset);
+
+    processes.forEach((proc) => {
+      const pos = nodeLayout[proc.id];
+      if (!pos) return;
+      drawNode(
+        ctx,
+        pos.x,
+        pos.y,
+        proc,
+        (proc._delta ?? 0) > 0,
+        proc.c === 4,
+      );
+    });
+  }
+
+  function updateTopology() {
+    const state = getState();
+    let totalSnd = 0;
+    let totalRcv = 0;
+    const processes = state.p || [];
+
+    processes.forEach((proc) => {
+      totalSnd += proc.ip || 0;
+      totalRcv += proc.ir || 0;
+    });
+
+    topologyTotalsEl.textContent = `CORES 0–7 · ${processes.length} PROC · SND ${totalSnd.toLocaleString()} · RCV ${totalRcv.toLocaleString()}`;
+
+  }
+
+  function updateSpokes() {
+    const perSection = Math.ceil(spokeEls.length / 8);
+    const ringSize = spokeLayerEl.getBoundingClientRect().width / 2;
+    const inner = ringSize * 0.31;
+    const rewards = LIVE.rewards;
+
+    spokeEls.forEach((spoke, index) => {
+      const section = index % 8;
+      const reward = rewards[section] || 0;
+      const angle = (360 / spokeEls.length) * index;
+      const radius = inner + 8;
+      spoke.style.transform = `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px)`;
+      spoke.style.background = reward > 0
+        ? `rgba(255,51,51,${0.08 + reward * 0.92})`
+        : "rgba(255,51,51,0.08)";
+      spoke.style.opacity = String(0.16 + reward * 0.84);
+    });
+  }
+
+  function setDotStyle(dot, background, opacity, glow = "none") {
+    dot.style.background = background;
+    dot.style.opacity = String(opacity);
+    dot.style.boxShadow = glow;
+  }
+
+  function updateDots() {
+    const processes = LIVE.processes || [];
+    const rt = processes.filter((proc) => proc.c === 3);
+    const cpu = processes.filter((proc) => proc.c === 1);
+    const io = processes.filter((proc) => proc.c === 2);
+    const bg = processes.filter((proc) => proc.c === 4);
+    const activeRt = rt.filter((proc) => LIVE.activePids.has(proc.id)).length;
+    const rtRatio = rt.length ? activeRt / rt.length : 0;
+    const cpuLoad = cpu.length
+      ? Math.min(1, cpu.reduce((sum, proc) => sum + (proc.f || 0), 0) / Math.max(cpu.length * 500, 1))
+      : 0;
+    const ipcGlow = Math.max(0.08, LIVE.ipcRate);
+    const fsGlow = Math.max(0.08, LIVE.fsLoad);
+
+    dotRings.rt.forEach((dot, index) => {
+      const hot = index < Math.round(dotRings.rt.length * rtRatio);
+      setDotStyle(
+        dot,
+        hot ? "rgba(255,51,51,0.95)" : "rgba(243,245,239,0.55)",
+        hot ? 0.95 : 0.35,
+        hot ? "0 0 10px rgba(255,51,51,0.35)" : "none",
+      );
+    });
+
+    dotRings.cpu.forEach((dot, index) => {
+      const hot = index < Math.round(dotRings.cpu.length * cpuLoad);
+      setDotStyle(
+        dot,
+        hot ? "rgba(243,245,239,0.82)" : "rgba(243,245,239,0.18)",
+        hot ? 0.75 : 0.2,
+      );
+    });
+
+    dotRings.io.forEach((dot, index) => {
+      const hot = index < Math.round(dotRings.io.length * ipcGlow);
+      setDotStyle(
+        dot,
+        hot ? "rgba(243,245,239,0.42)" : "rgba(243,245,239,0.10)",
+        hot ? 0.55 : 0.18,
+      );
+    });
+
+    dotRings.bg.forEach((dot, index) => {
+      const hot = index < Math.round(dotRings.bg.length * fsGlow);
+      setDotStyle(
+        dot,
+        hot ? "rgba(243,245,239,0.26)" : "rgba(243,245,239,0.08)",
+        hot ? 0.32 : 0.14,
+      );
+    });
+  }
+
+  function buildSparkline() {
+    const values = stateHolder.rewardHistory.slice(-20);
+    if (!values.length) {
+      sparklineEl.innerHTML = "";
+      return;
+    }
+    const max = Math.max(...values, 1);
+    const min = Math.min(...values, 0);
+    const range = Math.max(1, max - min);
+    const points = values.map((value, index) => {
+      const x = (index / Math.max(values.length - 1, 1)) * 210;
+      const y = 68 - ((value - min) / range) * 68;
+      return { x, y, value };
+    });
+    const path = points.map((point) => `${point.x},${point.y}`).join(" ");
+    const peaks = points
+      .map((point, index) => ({ point, index }))
+      .filter(({ index, point }) => {
+        const prev = points[index - 1]?.value ?? -Infinity;
+        const next = points[index + 1]?.value ?? -Infinity;
+        return point.value >= prev && point.value >= next && point.value > min;
+      })
+      .map(({ point }) => `<circle cx="${point.x}" cy="${point.y}" r="2" fill="var(--red)"></circle>`)
+      .join("");
+
+    sparklineEl.innerHTML = `
+      <polyline
+        points="${path}"
+        fill="none"
+        stroke="rgba(255,255,255,0.5)"
+        stroke-width="1.5"
+      ></polyline>
+      ${peaks}
+    `;
+  }
+
+  function updateSubpanels() {
+    const state = getState();
+    const rewards = state.r || fallbackState.r;
+    const totalSnd = totalBy("ip");
+    const totalRcv = totalBy("ir");
+    const totalFires = totalBy("f");
+    const totalFw = totalBy("fw");
+    const maxReward = Math.max(...rewards, 0);
+
+    const metricValues = {
+      ppo: maxReward,
+      ipc: Math.min(99, Math.round((totalSnd + totalRcv) / 30)),
+      mar: Math.min(99, Math.round(totalFires / 50)),
+      fs: Math.min(99, Math.round(totalFw / 20)),
+    };
+
+    metricConfig.forEach((metric) => {
+      const row = metricRowsEl.querySelector(`[data-metric="${metric.key}"]`);
+      if (!row) return;
+      const value = metricValues[metric.key] || 0;
+      row.querySelector("strong").textContent = `${value}%`;
+      row.querySelector(".metric-bar > span").style.width = `${value}%`;
+    });
+
+    buildSparkline();
+
+    const totalAlm = totalBy("al");
+    const totalAck = totalBy("ac");
+    const totalPkt = (state.p || []).find((proc) => proc.n === "net_parser")?.pkt || 0;
+    const statRows = [
+      ["SND", totalSnd],
+      ["RCV", totalRcv],
+      ["ALM", totalAlm],
+      ["ACK", totalAck],
+      ["WFS", totalFw],
+      ["PKT", totalPkt],
+    ];
+    statsGridEl.innerHTML = statRows
+      .map(([label, value]) => `
+        <span class="label">${label}</span>
+        <span class="value ${label === "ALM" || label === "ACK" ? (value > 0 ? "alert" : "") : ""}">
+          ${Number(value).toLocaleString()}
+        </span>
+      `)
+      .join("");
+
+    const fsRows = (state.fs || [])
+      .filter((entry) => !entry.p.startsWith("/proc") && !entry.p.startsWith("/sys"))
+      .slice(0, 4);
+    fileListEl.innerHTML = fsRows.length
+      ? fsRows
+          .map((entry) => `
+            <div class="file-row ${entry.a ? "active" : ""}">
+              <span>${entry.p.slice(0, 16)}</span>
+              <span>v${entry.v}</span>
+            </div>
+          `)
+          .join("")
+      : `<div class="file-row"><span>no data</span><span>--</span></div>`;
+
+    weightNumberEl.textContent = `${state.w ?? 376}`;
+    const delta = Number(state.d || 0);
+    weightDeltaEl.textContent = `DELTA: ${delta}`;
+    weightDeltaEl.className = `delta ${delta < 0 ? "neg" : ""}`;
+
+    miniBarEls.forEach((wrapper, index) => {
+      const reward = Math.max(0, rewards[index] || 0);
+      const fill = wrapper.querySelector(".bar > span");
+      fill.style.height = `${Math.max(0, Math.min(40, (reward / 100) * 40))}px`;
+      fill.style.background = reward > 0 ? "var(--red)" : "rgba(255,255,255,0.06)";
+    });
+  }
+
+  function updateCards() {
+    const state = getState();
+    const totalSnd = totalBy("ip");
+    const totalRcv = totalBy("ir");
+    const totalFires = totalBy("f");
+    const values = {
+      irq: { text: abbreviate(Math.floor((state.t || 0) / 100)), hot: Math.floor((state.t || 0) / 100) > 100 },
+      svc: { text: abbreviate(totalSnd + totalRcv), hot: false },
+      tick: { text: abbreviate(state.t || 0), hot: false },
+      mrt: { text: abbreviate(totalFires), hot: totalFires > 1000 },
+      pan: { text: "ON", hot: false },
+      ipc: { text: abbreviate(totalSnd), hot: totalSnd > 500 },
+      cores: { text: "08", hot: false },
+      ppo: { text: `${state.w ?? 376}`, hot: Number(state.w ?? 376) < 376 },
+    };
+
+    cardConfig.forEach((card) => {
+      const el = cardEls.get(card.key);
+      if (!el) return;
+      const value = values[card.key];
+      el.querySelector(".value").textContent = value.text;
+      let hot = value.hot;
+      if (card.key === "mrt") hot = LIVE.ipcRate > 0.1;
+      if (card.key === "ipc") hot = LIVE.ipcRate > 0.3;
+      if (card.key === "ppo") hot = LIVE.marLoad > 0.5;
+      if (card.key === "cores") hot = LIVE.rewards.some((reward) => reward > 0.4);
+      el.classList.toggle("hot", hot);
+    });
+  }
+
+  function pushShellEntry(entry) {
+    stateHolder.shell_history.push(entry);
+    if (stateHolder.shell_history.length > 30) {
+      stateHolder.shell_history.shift();
+    }
+  }
+
+  function finalizePendingShell() {
+    if (stateHolder.pendingShellIndex < 0) return;
+    const entry = stateHolder.shell_history[stateHolder.pendingShellIndex];
+    if (entry) {
+      if (entry.output === "…") {
+        entry.output = "";
+      }
+      entry.pending = false;
+    }
+    stateHolder.intentPending = false;
+    stateHolder.pendingShellIndex = -1;
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function appendShellLine(line) {
+    if (!line) return;
+    const pending = stateHolder.shell_history[stateHolder.pendingShellIndex];
+    if (line === "maya> ") {
+      finalizePendingShell();
+      return;
+    }
+    if (pending) {
+      const trimmed = line.trim();
+      if (trimmed === pending.cmd.trim()) {
+        return;
+      }
+      if (pending.kind === "intent" && stateHolder.intentPending) {
+        stateHolder.intentPending = false;
+      }
+      pending.output = pending.output === "…" || !pending.output
+        ? line
+        : `${pending.output}\n${line}`;
+      return;
+    }
+    pushShellEntry({ prompt: "", cmd: "", output: line, pending: false, kind: "shell" });
+  }
+
+  function handleShellOutput(text) {
+    if (!text) return;
+    let remaining = String(text).replace(/\r/g, "");
+    while (remaining.length) {
+      const promptIndex = remaining.indexOf("maya>");
+      const newlineIndex = remaining.indexOf("\n");
+      if (promptIndex === 0) {
+        finalizePendingShell();
+        remaining = remaining.slice(5);
+        continue;
+      }
+      if (newlineIndex === -1 && promptIndex === -1) {
+        appendShellLine(remaining);
+        break;
+      }
+      let boundary = remaining.length;
+      let promptBoundary = false;
+      if (promptIndex >= 0) {
+        boundary = Math.min(boundary, promptIndex);
+        promptBoundary = boundary === promptIndex;
+      }
+      if (newlineIndex >= 0 && newlineIndex < boundary) {
+        boundary = newlineIndex;
+        promptBoundary = false;
+      }
+      const chunk = remaining.slice(0, boundary);
+      if (chunk) {
+        appendShellLine(chunk);
+      }
+      if (promptBoundary) {
+        finalizePendingShell();
+        remaining = remaining.slice(boundary + 5);
+      } else if (remaining[boundary] === "\n") {
+        remaining = remaining.slice(boundary + 1);
+      } else {
+        remaining = remaining.slice(boundary);
+      }
+    }
+    updateShell();
+  }
+
+  function updateShell() {
+    shellPanelEl.classList.toggle("active", stateHolder.shell_active);
+    const entries = stateHolder.shell_history.slice(-3);
+    shellBodyEl.innerHTML = entries
+      .map((entry) => {
+        const outputClass = entry.kind === "intent" ? "shell-output intent-response" : "shell-output";
+        if (entry.cmd) {
+          const isIntent = entry.kind === "intent";
+          return `
+            <div class="shell-entry">
+              <div class="shell-command">
+                <span class="shell-prompt">${escapeHtml(entry.prompt)}</span>
+                ${isIntent
+                  ? `<span class="shell-intent-prefix">?</span><span>${escapeHtml(entry.cmd.slice(1).trimStart())}</span>`
+                  : `<span>${escapeHtml(entry.cmd)}</span>`}
+              </div>
+              <div class="${outputClass}">${escapeHtml(entry.output || "…")}</div>
+            </div>
+          `;
+        }
+        return `
+          <div class="shell-entry">
+            <div class="${outputClass}">${escapeHtml(entry.output)}</div>
+          </div>
+        `;
+      })
+      .join("");
+
+    if (stateHolder.intentPending) {
+      const pendingRow = document.createElement("div");
+      pendingRow.className = "shell-entry intent-pending";
+      pendingRow.innerHTML = `<div class="shell-output">· · ·</div>`;
+      shellBodyEl.appendChild(pendingRow);
+    }
+
+    const inputRow = document.createElement("div");
+    inputRow.className = "shell-input-row";
+    const currentInput = stateHolder.current_input || "";
+    if (currentInput.startsWith("?")) {
+      inputRow.innerHTML = `
+        <span class="shell-prompt">maya›</span>
+        <span class="shell-intent-prefix">?</span>
+        <span>${escapeHtml(currentInput.slice(1))}</span>
+        <span class="shell-cursor"></span>
+      `;
+    } else {
+      inputRow.innerHTML = `
+        <span class="shell-prompt">maya›</span>
+        <span>${escapeHtml(currentInput)}</span>
+        <span class="shell-cursor"></span>
+      `;
+    }
+    shellBodyEl.appendChild(inputRow);
+  }
+
+  function sendShellInput(text) {
+    if (!stateHolder.ws || stateHolder.ws.readyState !== WebSocket.OPEN) {
+      appendShellLine("bridge offline");
+      updateShell();
+      return;
+    }
+    stateHolder.ws.send(JSON.stringify({ type: "shell_input", text }));
+  }
+
+  function executeCommand(cmd) {
+    const trimmed = cmd.trim();
+    if (!trimmed) {
+      stateHolder.current_input = "";
+      updateShell();
+      sendShellInput("\n");
+      return;
+    }
+    pushShellEntry({
+      prompt: "maya›",
+      cmd: trimmed,
+      output: trimmed.startsWith("?") ? "" : "…",
+      pending: true,
+      kind: trimmed.startsWith("?") ? "intent" : "shell",
+    });
+    stateHolder.pendingShellIndex = stateHolder.shell_history.length - 1;
+    stateHolder.intentPending = trimmed.startsWith("?");
+    stateHolder.current_input = "";
+    updateShell();
+    sendShellInput(`${trimmed}\n`);
+  }
+
+  function updateAll() {
+    updateTopbar();
+    updateTopology();
+    updateSubpanels();
+    updateCards();
+    updateShell();
+  }
+
+  function animateHud(now) {
+    LIVE.time = now / 1000;
+    dashOffset += 0.3;
+    const speedFactor = 0.3 + LIVE.marLoad * 0.7;
+    const rotations = [
+      0.3 * speedFactor,
+      -0.5 * speedFactor,
+      0.8 * speedFactor,
+      -0.4 * speedFactor,
+    ];
+    dotRtEl.style.transform = `rotate(${LIVE.time * rotations[0]}rad)`;
+    dotCpuEl.style.transform = `rotate(${LIVE.time * rotations[1]}rad)`;
+    dotIoEl.style.transform = `rotate(${LIVE.time * rotations[2]}rad)`;
+    dotBgEl.style.transform = `rotate(${LIVE.time * rotations[3]}rad)`;
+    spokeLayerEl.style.transform = `rotate(${LIVE.time * rotations[0] * 0.6}rad)`;
+    updateSpokes();
+    updateDots();
+    updateCards();
+    renderTopology();
+    requestAnimationFrame(animateHud);
+  }
+
+  function applyTelemetry(telemetry) {
+    stateHolder.state = telemetry;
+    LIVE.tick = telemetry.t || 0;
+    const nextProcesses = (telemetry.p || []).map((proc) => {
+      const prevSent = LIVE.prevIpcByPid[proc.id]?.ip ?? proc.ip ?? 0;
+      const prevRecv = LIVE.prevIpcByPid[proc.id]?.ir ?? proc.ir ?? 0;
+      return {
+        ...proc,
+        _delta: ((proc.ip || 0) - prevSent) + ((proc.ir || 0) - prevRecv),
+      };
+    });
+    nextProcesses.forEach((proc) => {
+      LIVE.prevIpcByPid[proc.id] = {
+        ip: proc.ip || 0,
+        ir: proc.ir || 0,
+      };
+    });
+    LIVE.processes = nextProcesses;
+    LIVE.rewards = (telemetry.r || fallbackState.r).map((reward) => Math.min(reward / 30, 1));
+    const totalIpc = LIVE.processes.reduce((sum, proc) => sum + (proc.ip || 0), 0);
+    LIVE.ipcRate = Math.max(0, Math.min((totalIpc - LIVE.prevIpc) / 50, 1));
+    LIVE.prevIpc = totalIpc;
+    const totalFs = LIVE.processes.reduce((sum, proc) => sum + (proc.fw || 0), 0);
+    LIVE.fsLoad = Math.max(0, Math.min((totalFs - LIVE.prevFs) / 200, 1));
+    LIVE.prevFs = totalFs;
+    LIVE.marLoad = LIVE.rewards.length ? Math.max(...LIVE.rewards) : 0;
+    LIVE.activePids = new Set(LIVE.processes.filter((proc) => (proc._delta ?? 0) > 0).map((proc) => proc.id));
+    const totalReward = (telemetry.r || []).reduce((sum, value) => sum + value, 0);
+    stateHolder.rewardHistory.push(totalReward);
+    if (stateHolder.rewardHistory.length > 20) {
+      stateHolder.rewardHistory.shift();
+    }
+    updateAll();
+  }
+
+  function connect() {
+    const ws = new WebSocket("ws://localhost:8765");
+    stateHolder.ws = ws;
+    ws.onopen = () => {
+      statusEl.textContent = "LIVE";
+      statusEl.style.color = "var(--red)";
+    };
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg && msg.type === "shell_output") {
+          handleShellOutput(msg.text || "");
+          return;
+        }
+        const telemetry = msg && msg.type === "telemetry" ? msg.data : msg;
+        applyTelemetry(telemetry);
+      } catch (_err) {}
+    };
+    ws.onclose = () => {
+      statusEl.textContent = "RECONNECTING...";
+      statusEl.style.color = "var(--text-dim)";
+      setTimeout(connect, 2000);
+    };
+    ws.onerror = () => {
+      ws.close();
+    };
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "/" && !stateHolder.shell_active) {
+      event.preventDefault();
+      stateHolder.shell_active = true;
+      updateShell();
+      return;
+    }
+
+    if (event.key === "Escape") {
+      stateHolder.shell_active = false;
+      updateShell();
+      return;
+    }
+
+    if (!stateHolder.shell_active) {
+      return;
+    }
+
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      stateHolder.current_input = stateHolder.current_input.slice(0, -1);
+      updateShell();
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      executeCommand(stateHolder.current_input);
+      return;
+    }
+
+    if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      event.preventDefault();
+      stateHolder.current_input += event.key;
+      updateShell();
+    }
+  });
+
+  ensureSpokes();
+  ensureDots();
+  ensureMetrics();
+  ensureMiniBars();
+  ensureCards();
+  updateAll();
+  resizeTopologyCanvas();
+  requestAnimationFrame(animateHud);
+  window.addEventListener("resize", () => {
+    resizeTopologyCanvas();
+    renderTopology();
+  });
+  connect();
+})();
+</script>
+</body>
+</html>

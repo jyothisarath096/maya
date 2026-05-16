@@ -1,0 +1,11 @@
+[package]
+name = "mrt_logger"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "mrt_logger"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

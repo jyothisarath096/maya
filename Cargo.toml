@@ -1,0 +1,31 @@
+[workspace]
+members = [
+    "crates/kernel",
+    "crates/kernel-aarch64",
+    "crates/bootloader",
+    "crates/ai-runtime",
+    "crates/mrt",
+    "crates/shell",
+    "userspace/compute_workload",
+    "userspace/io_workload",
+    "userspace/background_task",
+    "userspace/matrix_multiply",
+    "userspace/net_parser",
+    "userspace/sort_suite",
+    "userspace/mrt_hello",
+    "userspace/mrt_producer",
+    "userspace/mrt_consumer",
+    "userspace/mrt_logger",
+    "userspace/mrt_shell",
+]
+resolver = "2"
+
+[profile.dev]
+opt-level = 1
+panic = "abort"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

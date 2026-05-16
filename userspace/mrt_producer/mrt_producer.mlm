@@ -1,0 +1,28 @@
+{
+  "maya_app_id": "mrt_producer",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f70000",
+  "reentrancy_guard_addr": "0x47f7f000",
+  "scratch_addr": "0x47fe8000",
+  "inject_return_vaddr": "0x47f700c0",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCsfUHJyUCOB7T_12mrt_producer17mrt_producer_main",
+      "vaddr": "0x42000000",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "_RNvNtCsh3kUd0VC43D_4core9panicking9panic_fmt",
+      "vaddr": "0x420003b4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

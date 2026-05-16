@@ -1,0 +1,5 @@
+[build]
+target = "targets/x86_64-aios.json"
+
+[unstable]
+build-std = ["core", "compiler_builtins"]

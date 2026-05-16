@@ -1,0 +1,11 @@
+[package]
+name = "net_parser"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "net_parser"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

@@ -1,0 +1,17 @@
+# Rust build artifacts
+target/
+target 2/
+userspace/hello_rust/target/
+
+# Python venv
+tools/mar/venv/
+
+# MLX/model weights
+*.metallib
+*.pt
+*.bin
+*.safetensors
+*.gguf
+
+# Debug logs
+scripts/maya-debug.log

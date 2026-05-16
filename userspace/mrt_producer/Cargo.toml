@@ -1,0 +1,11 @@
+[package]
+name = "mrt_producer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "mrt_producer"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

@@ -1,0 +1,41 @@
+{
+  "maya_app_id": "hello_c",
+  "shim_load_addr": "0x7f000000",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "syscall1",
+      "vaddr": "0x400092"
+    },
+    {
+      "intent_id": 101,
+      "name": "syscall3",
+      "vaddr": "0x4000b5"
+    },
+    {
+      "intent_id": 102,
+      "name": "maya_exit",
+      "vaddr": "0x4000e5"
+    },
+    {
+      "intent_id": 103,
+      "name": "maya_write",
+      "vaddr": "0x400102"
+    },
+    {
+      "intent_id": 104,
+      "name": "maya_getcap",
+      "vaddr": "0x400131"
+    },
+    {
+      "intent_id": 105,
+      "name": "maya_strlen",
+      "vaddr": "0x400150"
+    },
+    {
+      "intent_id": 106,
+      "name": "main",
+      "vaddr": "0x40017f"
+    }
+  ]
+}

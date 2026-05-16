@@ -1,0 +1,28 @@
+{
+  "maya_app_id": "background_task",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f20000",
+  "reentrancy_guard_addr": "0x48001000",
+  "scratch_addr": "0x47fe2000",
+  "inject_return_vaddr": "0x47f200c0",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCsa8qwohdrO3p_15background_task19mrt_background_main",
+      "vaddr": "0x41a00000",
+      "intent_class": "Background",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "_RNvNtCs8AGelFwENfp_17compiler_builtins3mem6memset",
+      "vaddr": "0x41a00168",
+      "intent_class": "Background",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

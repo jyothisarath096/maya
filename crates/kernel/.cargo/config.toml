@@ -1,0 +1,6 @@
+[build]
+rustflags = [
+    "-C", "target-feature=-mmx,-sse3,-ssse3,-sse4.1,-sse4.2,-avx,-avx2",
+    "-C", "no-redzone=yes",
+]
+target = "../../targets/x86_64-aios.json"

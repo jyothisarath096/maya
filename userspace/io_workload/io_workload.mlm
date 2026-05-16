@@ -1,0 +1,19 @@
+{
+  "maya_app_id": "io_workload",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f10000",
+  "reentrancy_guard_addr": "0x48000000",
+  "scratch_addr": "0x47fe1000",
+  "inject_return_vaddr": "0x47f10060",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCs6Ij6jwzgnN3_11io_workload11mrt_io_main",
+      "vaddr": "0x41900000",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    }
+  ]
+}

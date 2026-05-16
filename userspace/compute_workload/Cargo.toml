@@ -1,0 +1,11 @@
+[package]
+name = "compute_workload"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "compute_workload"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

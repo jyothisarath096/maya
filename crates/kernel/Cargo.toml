@@ -1,0 +1,11 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bootloader_api = "0.11.15"
+x86_64 = "0.15"
+linked_list_allocator = "0.10"
+spinning_top = "0.2"
+libm = "0.2"

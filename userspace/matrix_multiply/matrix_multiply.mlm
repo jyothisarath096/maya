@@ -1,0 +1,19 @@
+{
+  "maya_app_id": "matrix_multiply",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f30000",
+  "reentrancy_guard_addr": "0x47f3f000",
+  "scratch_addr": "0x47fe3000",
+  "inject_return_vaddr": "0x47f30060",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCsvzPyMHNy2N_15matrix_multiply15mrt_matrix_main",
+      "vaddr": "0x41b00000",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

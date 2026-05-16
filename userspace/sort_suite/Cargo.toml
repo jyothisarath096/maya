@@ -1,0 +1,11 @@
+[package]
+name = "sort_suite"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "sort_suite"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }

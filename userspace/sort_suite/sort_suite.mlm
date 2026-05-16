@@ -1,0 +1,46 @@
+{
+  "maya_app_id": "sort_suite",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f50000",
+  "reentrancy_guard_addr": "0x47f5f000",
+  "scratch_addr": "0x47ff9000",
+  "inject_return_vaddr": "0x47f50180",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCsciGLXdVoMCL_10sort_suite13mrt_sort_main",
+      "vaddr": "0x43100000",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "_RNvNtCs8dR8ZO2sPih_4core9panicking9panic_fmt",
+      "vaddr": "0x431002b8",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 102,
+      "name": "_RNvNtCsc01wLgczCq6_17compiler_builtins3mem6memcpy",
+      "vaddr": "0x431002c4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 103,
+      "name": "_RNvNtCsc01wLgczCq6_17compiler_builtins3mem6memset",
+      "vaddr": "0x431003d4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

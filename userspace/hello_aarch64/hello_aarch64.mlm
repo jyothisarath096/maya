@@ -1,0 +1,26 @@
+{
+  "maya_app_id": "hello_aarch64",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f00000",
+  "reentrancy_guard_addr": "0x47fff000",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "sub_41800010",
+      "vaddr": "0x41800010",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "sub_41800024",
+      "vaddr": "0x41800024",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

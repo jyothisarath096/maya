@@ -1,0 +1,19 @@
+{
+  "maya_app_id": "mrt_logger",
+  "arch": "aarch64",
+  "shim_load_addr": "0x47f00000",
+  "reentrancy_guard_addr": "0x47fff000",
+  "scratch_addr": "0x48008000",
+  "inject_return_vaddr": "0x47f00060",
+  "intent_registry": [
+    {
+      "intent_id": 100,
+      "name": "_RNvCsfXVMVFjkHvD_10mrt_logger15mrt_logger_main",
+      "vaddr": "0x44000000",
+      "intent_class": "Background",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    }
+  ]
+}

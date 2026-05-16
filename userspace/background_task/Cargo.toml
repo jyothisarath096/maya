@@ -1,0 +1,11 @@
+[package]
+name = "background_task"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "background_task"
+path = "main.rs"
+
+[dependencies]
+mrt = { path = "../../crates/mrt" }
