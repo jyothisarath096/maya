@@ -15,3 +15,29 @@ tools/mar/venv/
 
 # Debug logs
 scripts/maya-debug.log
+# Compiled userspace binaries
+userspace/**/*.mexe
+userspace/**/*.mlm
+userspace/**/*.mlmb
+userspace/**/*.mshm
+userspace/**/*.o
+userspace/**/*.s
+userspace/**/background_task
+userspace/**/compute_workload
+userspace/**/io_workload
+userspace/**/matrix_multiply
+userspace/**/mrt_*
+userspace/**/net_parser
+userspace/**/sort_suite
+
+# Python cache
+**/__pycache__/
+**/*.pyc
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Rust artifacts
+target/
+**/target/
