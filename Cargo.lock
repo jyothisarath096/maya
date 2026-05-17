@@ -374,6 +374,13 @@ name = "mrt"
 version = "0.1.0"
 
 [[package]]
+name = "mrt_analyst"
+version = "0.1.0"
+dependencies = [
+ "mrt",
+]
+
+[[package]]
 name = "mrt_consumer"
 version = "0.1.0"
 dependencies = [

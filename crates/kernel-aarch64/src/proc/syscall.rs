@@ -748,13 +748,15 @@ fn dispatch_io_handler(
         0x101 => {
             let buf_ptr = cap_hi;
             let len = (arg2 as usize).min(256);
-            let uart = 0xFFFF_0000_0900_0000u64 as *mut u32;
-            for index in 0..len {
-                let byte = unsafe { read_user_byte(buf_ptr + index as u64) };
-                unsafe {
-                    uart.write_volatile(byte as u32);
+            crate::uart::with_lock(|| {
+                let uart = 0xFFFF_0000_0900_0000u64 as *mut u32;
+                for index in 0..len {
+                    let byte = unsafe { read_user_byte(buf_ptr + index as u64) };
+                    unsafe {
+                        uart.write_volatile(byte as u32);
+                    }
                 }
-            }
+            });
             (len as i64, 0)
         }
         _ => (0, 0),

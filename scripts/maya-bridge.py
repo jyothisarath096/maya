@@ -45,11 +45,17 @@ class InferenceBackend(ABC):
             "Intent classes: 0=RealTime, 1=Compute, 2=IO, 4=Background.\n"
             "Key processes: mrt_producer(pid 11), mrt_consumer(12), "
             "mrt_hello(10), mrt_logger(13), mrt_shell(14), "
-            "compute_workload(4), matrix_multiply(7), io_workload(5), "
-            "net_parser(8), background_task(6), sort_suite(9)."
+            "mrt_analyst(pid 15) autonomous kernel analyst writing "
+            "/data/insights every 5s, compute_workload(4), "
+            "matrix_multiply(7), io_workload(5), net_parser(8), "
+            "background_task(6), sort_suite(9).\n"
+            "To answer questions about trends, recent balance, or system "
+            "health, consider the analyst findings in /data/insights "
+            "alongside the live telemetry."
         )
 
     def build_user_message(self, instruction: str, telemetry: dict) -> str:
+        global latest_insight_record
         procs = []
         total_alm = 0
         total_ack = 0
@@ -69,6 +75,9 @@ class InferenceBackend(ABC):
             f"{entry.get('p', '?')} v={entry.get('v', 0)} active={entry.get('a', 0)}"
             for entry in telemetry.get("fs", [])
         ]
+        analyst = ""
+        if latest_insight_record:
+            analyst = f"Latest analyst record:\n{latest_insight_record}\n\n"
         return (
             f"Kernel tick: {telemetry.get('t', 0)}\n"
             f"PPO weights: {telemetry.get('w', 0)} delta={telemetry.get('d', 0)}\n"
@@ -76,6 +85,7 @@ class InferenceBackend(ABC):
             f"Totals: alarms={total_alm} acks={total_ack} fs_writes={total_fw}\n"
             f"Files:\n" + "\n".join(fs_rows) + "\n"
             f"Processes:\n" + "\n".join(procs) + "\n\n"
+            + analyst +
             f"Query: {instruction}"
         )
 
@@ -275,6 +285,8 @@ SERIAL_RETRY_S = 0.5
 
 latest_state = None
 latest_telemetry = {}
+latest_insight_record = ""
+pending_insight_lines = []
 clients = set()
 serial_writer = None
 serial_lock = None
@@ -331,6 +343,7 @@ async def broadcast_telemetry(state):
 
 
 async def broadcast_shell_output(text, intent_response=False):
+    update_insight_cache(text)
     payload = {"type": "shell_output", "text": text}
     if intent_response:
         payload["intent_response"] = True
@@ -347,6 +360,23 @@ async def send_serial_text(text):
             await serial_writer.drain()
         except Exception:
             serial_writer = None
+
+
+def update_insight_cache(text: str):
+    global latest_insight_record, pending_insight_lines
+    if text.startswith("CYCLE="):
+        pending_insight_lines = [text]
+        return
+    if pending_insight_lines:
+        prefixes = ("SCHED=", "IPC=", "FS=", "PROC=", "LEARN=")
+        if any(text.startswith(prefix) for prefix in prefixes):
+            pending_insight_lines.append(text)
+            if text.startswith("LEARN="):
+                latest_insight_record = "\n".join(pending_insight_lines)
+                pending_insight_lines = []
+            return
+        if text.startswith("maya>"):
+            pending_insight_lines = []
 
 
 def log_training_example(query: str, telemetry: dict, response: str):

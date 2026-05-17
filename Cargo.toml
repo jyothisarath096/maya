@@ -17,6 +17,7 @@ members = [
     "userspace/mrt_consumer",
     "userspace/mrt_logger",
     "userspace/mrt_shell",
+    "userspace/mrt_analyst",
 ]
 resolver = "2"
 

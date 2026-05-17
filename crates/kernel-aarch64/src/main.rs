@@ -84,6 +84,12 @@ const MRT_LOGGER_MLMB: &[u8] = include_bytes!("../../../userspace/mrt_logger/mrt
 const MRT_SHELL_MEXE: &[u8] = include_bytes!("../../../userspace/mrt_shell/mrt_shell.mexe");
 const MRT_SHELL_MSHM: &[u8] = include_bytes!("../../../userspace/mrt_shell/mrt_shell.mshm");
 const MRT_SHELL_MLMB: &[u8] = include_bytes!("../../../userspace/mrt_shell/mrt_shell.mlmb");
+const MRT_ANALYST_MEXE: &[u8] =
+    include_bytes!("../../../userspace/mrt_analyst/mrt_analyst.mexe");
+const MRT_ANALYST_MSHM: &[u8] =
+    include_bytes!("../../../userspace/mrt_analyst/mrt_analyst.mshm");
+const MRT_ANALYST_MLMB: &[u8] =
+    include_bytes!("../../../userspace/mrt_analyst/mrt_analyst.mlmb");
 
 #[global_allocator]
 static GLOBAL_ALLOCATOR: BumpAllocator = BumpAllocator;
@@ -360,6 +366,20 @@ pub extern "C" fn kernel_main() -> ! {
         crate::sched::process::ProcessClass::Interactive,
         1.0,
     );
+    let analyst_pid = crate::proc::launch_agentic_aarch64(
+        "mrt_analyst",
+        MRT_ANALYST_MEXE,
+        MRT_ANALYST_MSHM,
+        MRT_ANALYST_MLMB,
+        false,
+    )
+    .expect("mrt_analyst launch");
+    crate::proc::add_process_to_core(
+        4,
+        analyst_pid,
+        crate::sched::process::ProcessClass::Batch,
+        0.5,
+    );
 
     crate::uart_print!("IPC channel created: producer=");
     crate::uart_print_usize!(producer_pid as usize);
@@ -376,12 +396,12 @@ pub extern "C" fn kernel_main() -> ! {
     crate::uart_print!("  Core 1: mrt_hello+mrt_logger+mrt_shell\n");
     crate::uart_print!("  Core 2: compute\n");
     crate::uart_print!("  Core 3: io\n");
-    crate::uart_print!("  Core 4: background\n");
+    crate::uart_print!("  Core 4: background+mrt_analyst\n");
     crate::uart_print!("  Core 5: matrix\n");
     crate::uart_print!("  Core 6: net\n");
     crate::uart_print!("  Core 7: sort\n");
 
-    crate::uart_print!("11 processes launched\n");
+    crate::uart_print!("12 processes launched\n");
     crate::gpu::canvas::render_frame();
     crate::gpu::flush_all();
     let process_count = crate::sched::queue::process_count();

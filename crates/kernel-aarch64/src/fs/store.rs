@@ -495,15 +495,17 @@ fn generate_virtual(vtype: u32, target_pid: u16, out: &mut [u8]) -> Result<usize
 }
 
 fn generate_proc_stats(pid: u16, out: &mut [u8]) -> Result<usize, KernelError> {
-    let process = crate::sched::queue::get_process(pid).ok_or(KernelError::InvalidArgument)?;
+    let snap = crate::proc::procfs_snapshot_for_pid(pid).ok_or(KernelError::InvalidArgument)?;
     let mut buf = [0u8; 256];
     let mut pos = 0;
-    pos += write_field(&mut buf[pos..], b"cpu_ticks:", process.stats.cpu_ticks_used);
-    pos += write_field(&mut buf[pos..], b"ipc_sends:", process.stats.ipc_sends);
-    pos += write_field(&mut buf[pos..], b"ipc_recvs:", process.stats.ipc_recvs);
-    pos += write_field(&mut buf[pos..], b"file_reads:", process.stats.file_reads);
-    pos += write_field(&mut buf[pos..], b"file_writes:", process.stats.file_writes);
-    pos += write_field(&mut buf[pos..], b"intent_fires:", process.stats.intent_fire_count);
+    pos += write_field(&mut buf[pos..], b"cpu_ticks:", snap.cpu);
+    pos += write_field(&mut buf[pos..], b"ipc_sends:", snap.ipc_s);
+    pos += write_field(&mut buf[pos..], b"ipc_recvs:", snap.ipc_r);
+    pos += write_field(&mut buf[pos..], b"file_reads:", 0);
+    pos += write_field(&mut buf[pos..], b"file_writes:", snap.fw);
+    pos += write_field(&mut buf[pos..], b"alarms_sent:", snap.alm);
+    pos += write_field(&mut buf[pos..], b"alarms_acked:", snap.ack);
+    pos += write_field(&mut buf[pos..], b"intent_fires:", snap.fires);
     let n = pos.min(out.len());
     out[..n].copy_from_slice(&buf[..n]);
     Ok(n)
@@ -528,17 +530,26 @@ fn generate_proc_name(pid: u16, out: &mut [u8]) -> Result<usize, KernelError> {
 }
 
 fn generate_sched_info(out: &mut [u8]) -> Result<usize, KernelError> {
+    core::sync::atomic::fence(core::sync::atomic::Ordering::Acquire);
     let model = crate::model::weights::load();
     let sum: i32 = model.out_w.iter().map(|&w| w as i32).sum();
-    let mut buf = [0u8; 64];
+    let rewards = crate::sched::policy::get_last_rewards();
+    let tick = crate::arch::timer::current_tick();
+    let mut buf = [0u8; 160];
     let mut pos = 0;
+    pos += write_field(&mut buf[pos..], b"tick:", tick);
     pos += write_field(&mut buf[pos..], b"out_w_sum:", sum as u64);
+    for (idx, reward) in rewards.iter().enumerate() {
+        let key = [b'r', b'0' + idx as u8, b':'];
+        pos += write_i32_field(&mut buf[pos..], &key, *reward);
+    }
     let n = pos.min(out.len());
     out[..n].copy_from_slice(&buf[..n]);
     Ok(n)
 }
 
 fn generate_fs_info(out: &mut [u8]) -> Result<usize, KernelError> {
+    core::sync::atomic::fence(core::sync::atomic::Ordering::Acquire);
     let store = FILE_STORE.lock();
     let count = store.count;
     drop(store);
@@ -575,4 +586,47 @@ fn write_field(buf: &mut [u8], key: &[u8], val: u64) -> usize {
         pos += 1;
     }
     pos
+}
+
+fn write_i32_field(buf: &mut [u8], key: &[u8], val: i32) -> usize {
+    let mut pos = 0usize;
+    let klen = key.len().min(buf.len());
+    buf[..klen].copy_from_slice(&key[..klen]);
+    pos += klen;
+
+    if val < 0 {
+        if pos < buf.len() {
+            buf[pos] = b'-';
+            pos += 1;
+        }
+        pos += write_decimal(&mut buf[pos..], val.unsigned_abs() as u64);
+    } else {
+        pos += write_decimal(&mut buf[pos..], val as u64);
+    }
+
+    if pos < buf.len() {
+        buf[pos] = b'\n';
+        pos += 1;
+    }
+    pos
+}
+
+fn write_decimal(buf: &mut [u8], val: u64) -> usize {
+    let mut tmp = [0u8; 20];
+    let mut tlen = 0usize;
+    let mut v = val;
+    if v == 0 {
+        tmp[0] = b'0';
+        tlen = 1;
+    } else {
+        while v > 0 && tlen < tmp.len() {
+            tmp[tlen] = b'0' + (v % 10) as u8;
+            v /= 10;
+            tlen += 1;
+        }
+        tmp[..tlen].reverse();
+    }
+    let copy = tlen.min(buf.len());
+    buf[..copy].copy_from_slice(&tmp[..copy]);
+    copy
 }

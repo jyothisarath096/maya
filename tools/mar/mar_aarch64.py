@@ -34,9 +34,10 @@ SHIM_LAYOUTS = {
     "mrt_producer": (0x47F70000, 0x47F7F000, "Compute"),
     "mrt_consumer": (0x47F80000, 0x47F8F000, "IO"),
     "mrt_shell": (0x47F90000, 0x47F9F000, "IO"),
+    "mrt_analyst": (0x47FA0000, 0x47FAF000, "Background"),
     "hello_aarch64": (0x47F00000, 0x47FFF000, "Unknown"),
 }
-NO_HOOK_APPS = {"mrt_shell"}
+NO_HOOK_APPS = {"mrt_shell", "mrt_analyst"}
 SKIP_HOOK_SYMBOLS = {
     "mrt_producer": {"_start"},
     "mrt_consumer": {"_start"},

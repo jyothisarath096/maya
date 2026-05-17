@@ -265,6 +265,56 @@ where
     true
 }
 
+pub fn snapshot_for_procfs<F>(mut f: F) -> usize
+where
+    F: FnMut(crate::telemetry::ProcSnap),
+{
+    let table = PROC_TABLE.lock();
+    let mut count = 0usize;
+    for entry in table.entries.iter() {
+        if !entry.valid {
+            continue;
+        }
+        let nlen = (entry.name_len as usize).min(12);
+        let mut snap = crate::telemetry::ProcSnap::empty();
+        snap.valid = true;
+        snap.pid = entry.pid;
+        snap.intent = entry.intent_class as u8;
+        snap.name_len = nlen as u8;
+        snap.name[..nlen].copy_from_slice(&entry.name[..nlen]);
+
+        if let Some((core_id, process)) = crate::sched::queue::get_process_with_core(entry.pid) {
+            snap.core_id = core_id;
+            snap.cpu = process.stats.cpu_ticks_used;
+            snap.ipc_s = process.stats.ipc_sends;
+            snap.ipc_r = process.stats.ipc_recvs;
+            snap.alm = process.stats.alarms_sent;
+            snap.ack = process.stats.alarms_acked;
+            snap.fw = process.stats.file_writes;
+            snap.fires = process.stats.intent_fire_count;
+            snap.pkt = if entry.pid == 8 {
+                process.stats.intent_fire_count
+            } else {
+                0
+            };
+        }
+
+        count += 1;
+        f(snap);
+    }
+    count
+}
+
+pub fn procfs_snapshot_for_pid(pid: u16) -> Option<crate::telemetry::ProcSnap> {
+    let mut found = None;
+    snapshot_for_procfs(|snap| {
+        if snap.pid == pid {
+            found = Some(snap);
+        }
+    });
+    found
+}
+
 pub fn set_current_pid(pid: u16) {
     CURRENT_PID.store(pid, Ordering::Release);
 }
