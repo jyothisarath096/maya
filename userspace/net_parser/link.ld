@@ -5,7 +5,7 @@ PHDRS {
 }
 
 SECTIONS {
-  . = 0x43000000;
+  . = 0x41C00000;
 
   .text : { *(.text .text.*) } :load
   .rodata : { *(.rodata .rodata.*) } :load

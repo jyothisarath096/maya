@@ -3,17 +3,127 @@
   "arch": "aarch64",
   "shim_load_addr": "0x47f40000",
   "reentrancy_guard_addr": "0x47f4f000",
-  "scratch_addr": "0x47ff8000",
-  "inject_return_vaddr": "0x47f40060",
+  "scratch_addr": "0x47fe4000",
+  "inject_return_vaddr": "0x47f404e0",
   "intent_registry": [
     {
       "intent_id": 100,
-      "name": "_RNvCshEG6WohzJtj_10net_parser12mrt_net_main",
-      "vaddr": "0x43000000",
+      "name": "_RNvCsiBpA0jnDqjO_10net_parser12mrt_net_main",
+      "vaddr": "0x41c00000",
       "intent_class": "IO",
       "capability_requirements": [
         "NET_SEND",
         "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "_RNvNtCs4PPaXBABqtd_3mrt6thread9yield_now",
+      "vaddr": "0x41c001c4",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 102,
+      "name": "_RNvNtCs4PPaXBABqtd_3mrt6intent8register",
+      "vaddr": "0x41c001d0",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 103,
+      "name": "_RNvNtCs4PPaXBABqtd_3mrt6intent9telemetry",
+      "vaddr": "0x41c001fc",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 104,
+      "name": "_RNvMNtCs4PPaXBABqtd_3mrt3netNtB2_7MayaNet4recv",
+      "vaddr": "0x41c00264",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 105,
+      "name": "_RNvMNtCs4PPaXBABqtd_3mrt3netNtB2_7MayaNet4send",
+      "vaddr": "0x41c00278",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 106,
+      "name": "_RNvMNtCs4PPaXBABqtd_3mrt2ioNtB2_7MrtFile5write",
+      "vaddr": "0x41c0028c",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 107,
+      "name": "_RNvMNtCs4PPaXBABqtd_3mrt2ioNtB2_7MrtFile6stdout",
+      "vaddr": "0x41c002b4",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 108,
+      "name": "_RNvCsd9V5JTpRtX7_7___rustc17rust_begin_unwind",
+      "vaddr": "0x41c002f0",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 109,
+      "name": "_RNvNtCs9Y1OpxCE6bC_4core9panicking30panic_null_pointer_dereference",
+      "vaddr": "0x41c002fc",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 110,
+      "name": "_RNvNtCs9Y1OpxCE6bC_4core9panicking9panic_fmt",
+      "vaddr": "0x41c00314",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 111,
+      "name": "_RNvNvNtCs9Y1OpxCE6bC_4core9panicking18panic_nounwind_fmt7runtime",
+      "vaddr": "0x41c00334",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 112,
+      "name": "_RNvNtNtCs9Y1OpxCE6bC_4core9panicking11panic_const24panic_const_add_overflow",
+      "vaddr": "0x41c00354",
+      "intent_class": "IO",
+      "capability_requirements": [
+        "OBSERVE"
       ]
     }
   ]

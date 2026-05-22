@@ -416,6 +416,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mrt_watchdog"
+version = "0.1.0"
+dependencies = [
+ "mrt",
+]
+
+[[package]]
 name = "net_parser"
 version = "0.1.0"
 dependencies = [

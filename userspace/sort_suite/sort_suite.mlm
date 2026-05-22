@@ -3,13 +3,13 @@
   "arch": "aarch64",
   "shim_load_addr": "0x47f50000",
   "reentrancy_guard_addr": "0x47f5f000",
-  "scratch_addr": "0x47ff9000",
-  "inject_return_vaddr": "0x47f50180",
+  "scratch_addr": "0x47fe5000",
+  "inject_return_vaddr": "0x47f50600",
   "intent_registry": [
     {
       "intent_id": 100,
-      "name": "_RNvCsciGLXdVoMCL_10sort_suite13mrt_sort_main",
-      "vaddr": "0x43100000",
+      "name": "_RNvCs7n8EjxYy0Aj_10sort_suite13mrt_sort_main",
+      "vaddr": "0x41d00000",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"
@@ -17,8 +17,8 @@
     },
     {
       "intent_id": 101,
-      "name": "_RNvNtCs8dR8ZO2sPih_4core9panicking9panic_fmt",
-      "vaddr": "0x431002b8",
+      "name": "_RNvCsd9V5JTpRtX7_7___rustc17rust_begin_unwind",
+      "vaddr": "0x41d004dc",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"
@@ -26,17 +26,125 @@
     },
     {
       "intent_id": 102,
-      "name": "_RNvNtCsc01wLgczCq6_17compiler_builtins3mem6memcpy",
-      "vaddr": "0x431002c4",
+      "name": "_RNvNtCs6XGqhamkTVW_3mrt6thread9yield_now",
+      "vaddr": "0x41d004e4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 103,
+      "name": "_RNvNtCs6XGqhamkTVW_3mrt6intent8register",
+      "vaddr": "0x41d004f0",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"
       ]
     },
     {
-      "intent_id": 103,
-      "name": "_RNvNtCsc01wLgczCq6_17compiler_builtins3mem6memset",
-      "vaddr": "0x431003d4",
+      "intent_id": 104,
+      "name": "_RNvNtCs6XGqhamkTVW_3mrt6intent9telemetry",
+      "vaddr": "0x41d0051c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 105,
+      "name": "_RNvNtCshBVSBNpNgDy_4core9panicking18panic_bounds_check",
+      "vaddr": "0x41d0052c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 106,
+      "name": "_RNvNtCshBVSBNpNgDy_4core9panicking30panic_null_pointer_dereference",
+      "vaddr": "0x41d00560",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 107,
+      "name": "_RNvNtCshBVSBNpNgDy_4core9panicking9panic_fmt",
+      "vaddr": "0x41d00578",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 108,
+      "name": "_RNvNvNtCshBVSBNpNgDy_4core9panicking18panic_nounwind_fmt7runtime",
+      "vaddr": "0x41d00598",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 109,
+      "name": "_RNvMsa_NtCshBVSBNpNgDy_4core3fmtNtB5_9Formatter12pad_integral",
+      "vaddr": "0x41d005b8",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 110,
+      "name": "_RNvNvMsa_NtCshBVSBNpNgDy_4core3fmtNtB7_9Formatter12pad_integral12write_prefix",
+      "vaddr": "0x41d00970",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 111,
+      "name": "_RNvMsk_NtNtNtCshBVSBNpNgDy_4core3fmt3num3impj10__fmt_inner.llvm.14135755388709282482",
+      "vaddr": "0x41d009d4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 112,
+      "name": "_RNvNtNtCshBVSBNpNgDy_4core9panicking11panic_const24panic_const_add_overflow",
+      "vaddr": "0x41d00bfc",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 113,
+      "name": "_RNvNtNtCshBVSBNpNgDy_4core9panicking11panic_const24panic_const_sub_overflow",
+      "vaddr": "0x41d00c10",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 114,
+      "name": "_RNvXsi_NtNtNtCshBVSBNpNgDy_4core3fmt3num3impjNtB9_7Display3fmt",
+      "vaddr": "0x41d00c24",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 115,
+      "name": "_RNvNtNtCshBVSBNpNgDy_4core3str5count14do_count_chars",
+      "vaddr": "0x41d00c9c",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"

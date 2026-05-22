@@ -3,13 +3,13 @@
   "arch": "aarch64",
   "shim_load_addr": "0x47f70000",
   "reentrancy_guard_addr": "0x47f7f000",
-  "scratch_addr": "0x47fe8000",
-  "inject_return_vaddr": "0x47f700c0",
+  "scratch_addr": "0x47fe7000",
+  "inject_return_vaddr": "0x47f70c00",
   "intent_registry": [
     {
       "intent_id": 100,
-      "name": "_RNvCsfUHJyUCOB7T_12mrt_producer17mrt_producer_main",
-      "vaddr": "0x42000000",
+      "name": "_RNvCshRe1wthQtu5_12mrt_producer17mrt_producer_main",
+      "vaddr": "0x41f00000",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"
@@ -17,8 +17,281 @@
     },
     {
       "intent_id": 101,
-      "name": "_RNvNtCsh3kUd0VC43D_4core9panicking9panic_fmt",
-      "vaddr": "0x420003b4",
+      "name": "_RNvNtCs6RrY5rSjEya_3mrt6thread9yield_now",
+      "vaddr": "0x41f0036c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 102,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2fsNtB2_8MayaFile4open",
+      "vaddr": "0x41f00378",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 103,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2fsNtB2_8MayaFile5write",
+      "vaddr": "0x41f003ac",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 104,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2fsNtB2_8MayaFile6revoke",
+      "vaddr": "0x41f003c0",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 105,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2fsNtB2_8MayaFile8delegate",
+      "vaddr": "0x41f003e4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 106,
+      "name": "_RINvNtCsg1T18S42G01_4core3ptr13drop_in_placeNtNtCs6RrY5rSjEya_3mrt2fs8MayaFileEBK_",
+      "vaddr": "0x41f00424",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 107,
+      "name": "_RNvNtCs6RrY5rSjEya_3mrt6intent8register",
+      "vaddr": "0x41f00458",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 108,
+      "name": "_RNvCsd9V5JTpRtX7_7___rustc17rust_begin_unwind",
+      "vaddr": "0x41f00510",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 109,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2ioNtB2_7MrtFile5write",
+      "vaddr": "0x41f00518",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 110,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt2ioNtB2_7MrtFile6stdout",
+      "vaddr": "0x41f00540",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 111,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt3ipcNtB2_13SensorReading10from_bytes",
+      "vaddr": "0x41f0057c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 112,
+      "name": "_RNvMNtCs6RrY5rSjEya_3mrt3ipcNtB2_13SensorReading8to_bytes",
+      "vaddr": "0x41f005ac",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 113,
+      "name": "_RNvMs_NtCs6RrY5rSjEya_3mrt3ipcNtB4_10MrtChannel11lookup_send",
+      "vaddr": "0x41f00628",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 114,
+      "name": "_RNvMs_NtCs6RrY5rSjEya_3mrt3ipcNtB4_10MrtChannel4recv",
+      "vaddr": "0x41f00660",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 115,
+      "name": "_RNvMs_NtCs6RrY5rSjEya_3mrt3ipcNtB4_10MrtChannel4send",
+      "vaddr": "0x41f00670",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "NET_SEND",
+        "NET_RECV"
+      ]
+    },
+    {
+      "intent_id": 116,
+      "name": "_RNvMs_NtCs6RrY5rSjEya_3mrt3ipcNtB4_10MrtChannel6lookup",
+      "vaddr": "0x41f00688",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 117,
+      "name": "_RNvNtCsg1T18S42G01_4core9panicking18panic_bounds_check",
+      "vaddr": "0x41f006c0",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 118,
+      "name": "_RNvNtCsg1T18S42G01_4core9panicking30panic_null_pointer_dereference",
+      "vaddr": "0x41f006f4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 119,
+      "name": "_RNvNtCsg1T18S42G01_4core9panicking5panic",
+      "vaddr": "0x41f0070c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 120,
+      "name": "_RNvNtCsg1T18S42G01_4core9panicking9panic_fmt",
+      "vaddr": "0x41f00718",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 121,
+      "name": "_RNvNvNtCsg1T18S42G01_4core9panicking18panic_nounwind_fmt7runtime",
+      "vaddr": "0x41f00738",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 122,
+      "name": "_RNvMsa_NtCsg1T18S42G01_4core3fmtNtB5_9Formatter12pad_integral",
+      "vaddr": "0x41f00758",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 123,
+      "name": "_RNvNvMsa_NtCsg1T18S42G01_4core3fmtNtB7_9Formatter12pad_integral12write_prefix",
+      "vaddr": "0x41f00b10",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 124,
+      "name": "_RNvMsk_NtNtNtCsg1T18S42G01_4core3fmt3num3impj10__fmt_inner.llvm.4189639198212520675",
+      "vaddr": "0x41f00b74",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 125,
+      "name": "_RNvNtNtCsg1T18S42G01_4core9panicking11panic_const24panic_const_add_overflow",
+      "vaddr": "0x41f00d9c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 126,
+      "name": "_RNvNtNtCsg1T18S42G01_4core9panicking11panic_const24panic_const_sub_overflow",
+      "vaddr": "0x41f00db0",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 127,
+      "name": "_RNvXsi_NtNtNtCsg1T18S42G01_4core3fmt3num3impjNtB9_7Display3fmt",
+      "vaddr": "0x41f00dc4",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 128,
+      "name": "_RINvNtCsg1T18S42G01_4core5slice20copy_from_slice_implhEB4_",
+      "vaddr": "0x41f00e3c",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 129,
+      "name": "_RNvNvNtCsg1T18S42G01_4core5slice20copy_from_slice_impl17len_mismatch_fail",
+      "vaddr": "0x41f00e90",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 130,
+      "name": "_RNvNvNvNvNtCsg1T18S42G01_4core5slice20copy_from_slice_impl17len_mismatch_fail8do_panic7runtime",
+      "vaddr": "0x41f00ea0",
+      "intent_class": "Compute",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 131,
+      "name": "_RNvNtNtCsg1T18S42G01_4core3str5count14do_count_chars",
+      "vaddr": "0x41f00ed0",
       "intent_class": "Compute",
       "capability_requirements": [
         "OBSERVE"

@@ -92,7 +92,8 @@ impl KeyboardDriver {
             if mmio_read32(base, REG_MAGIC) != 0x7472_6976 {
                 continue;
             }
-            if mmio_read32(base, REG_DEVICE_ID) == DEVICE_ID_INPUT {
+            let dev = mmio_read32(base, REG_DEVICE_ID);
+            if dev == DEVICE_ID_INPUT {
                 return Some(base);
             }
         }
@@ -170,6 +171,7 @@ pub fn init() -> bool {
 
 pub fn poll() {
     KEYBOARD.lock().poll();
+    poll_uart_input();
 }
 
 pub fn key_available() -> bool {
@@ -198,6 +200,16 @@ fn push_key(ch: u8) {
     let idx = (head as usize) % KEY_RING.len();
     KEY_RING[idx].store(ch, Ordering::Relaxed);
     KEY_HEAD.store(next, Ordering::Release);
+}
+
+fn poll_uart_input() {
+    while let Some(ch) = crate::uart::read_byte_nonblocking() {
+        match ch {
+            b'\r' => push_key(b'\n'),
+            0x08 | 0x7f | b'\n' | b'\t' | b' ' ..= b'~' => push_key(ch),
+            _ => {}
+        }
+    }
 }
 
 fn handle_event(event: InputEvent) {

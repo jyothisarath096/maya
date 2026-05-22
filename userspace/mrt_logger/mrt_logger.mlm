@@ -3,14 +3,266 @@
   "arch": "aarch64",
   "shim_load_addr": "0x47f00000",
   "reentrancy_guard_addr": "0x47fff000",
-  "scratch_addr": "0x48008000",
-  "inject_return_vaddr": "0x47f00060",
+  "scratch_addr": "0x47fe9000",
+  "inject_return_vaddr": "0x47f00ae0",
   "intent_registry": [
     {
       "intent_id": 100,
-      "name": "_RNvCsfXVMVFjkHvD_10mrt_logger15mrt_logger_main",
-      "vaddr": "0x44000000",
+      "name": "_RNvCsi7o2XrYMVcv_10mrt_logger15mrt_logger_main",
+      "vaddr": "0x42100000",
       "intent_class": "Background",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 101,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile12read_version",
+      "vaddr": "0x42100960",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 102,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile12version_info",
+      "vaddr": "0x42100980",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 103,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile3tag",
+      "vaddr": "0x4210099c",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 104,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile4open",
+      "vaddr": "0x421009b8",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 105,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile4read",
+      "vaddr": "0x421009ec",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 106,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2fsNtB2_8MayaFile5write",
+      "vaddr": "0x42100a00",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 107,
+      "name": "_RNvNtCshujczPqBKcZ_3mrt2fs15query_by_intent",
+      "vaddr": "0x42100a14",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 108,
+      "name": "_RNvNtCshujczPqBKcZ_3mrt2fs5mkdir",
+      "vaddr": "0x42100a2c",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 109,
+      "name": "_RNvCsd9V5JTpRtX7_7___rustc17rust_begin_unwind",
+      "vaddr": "0x42100a48",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 110,
+      "name": "_RINvNtCskSW6hGJTADm_4core3ptr13drop_in_placeNtNtCshujczPqBKcZ_3mrt2fs8MayaFileEBK_",
+      "vaddr": "0x42100a50",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 111,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2ioNtB2_7MrtFile5write",
+      "vaddr": "0x42100a84",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 112,
+      "name": "_RNvMNtCshujczPqBKcZ_3mrt2ioNtB2_7MrtFile6stdout",
+      "vaddr": "0x42100aac",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 113,
+      "name": "_RNvNtCshujczPqBKcZ_3mrt6thread9yield_now",
+      "vaddr": "0x42100ae8",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_READ"
+      ]
+    },
+    {
+      "intent_id": 114,
+      "name": "_RNvNtCshujczPqBKcZ_3mrt6intent8register",
+      "vaddr": "0x42100af4",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 115,
+      "name": "_RNvNtCskSW6hGJTADm_4core9panicking18panic_bounds_check",
+      "vaddr": "0x42100b20",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 116,
+      "name": "_RNvNtCskSW6hGJTADm_4core9panicking30panic_null_pointer_dereference",
+      "vaddr": "0x42100b54",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 117,
+      "name": "_RNvNtCskSW6hGJTADm_4core9panicking9panic_fmt",
+      "vaddr": "0x42100b6c",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 118,
+      "name": "_RNvNvNtCskSW6hGJTADm_4core9panicking18panic_nounwind_fmt7runtime",
+      "vaddr": "0x42100b8c",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 119,
+      "name": "_RNvMsa_NtCskSW6hGJTADm_4core3fmtNtB5_9Formatter12pad_integral",
+      "vaddr": "0x42100bac",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 120,
+      "name": "_RNvNvMsa_NtCskSW6hGJTADm_4core3fmtNtB7_9Formatter12pad_integral12write_prefix",
+      "vaddr": "0x42100f64",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "FS_WRITE"
+      ]
+    },
+    {
+      "intent_id": 121,
+      "name": "_RNvMsk_NtNtNtCskSW6hGJTADm_4core3fmt3num3impj10__fmt_inner.llvm.15861821997714862837",
+      "vaddr": "0x42100fc8",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 122,
+      "name": "_RNvNtNtCskSW6hGJTADm_4core9panicking11panic_const24panic_const_add_overflow",
+      "vaddr": "0x421011f0",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 123,
+      "name": "_RNvNtNtCskSW6hGJTADm_4core9panicking11panic_const24panic_const_sub_overflow",
+      "vaddr": "0x42101204",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 124,
+      "name": "_RNvXsi_NtNtNtCskSW6hGJTADm_4core3fmt3num3impjNtB9_7Display3fmt",
+      "vaddr": "0x42101218",
+      "intent_class": "RealTime",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 125,
+      "name": "_RINvNtCskSW6hGJTADm_4core5slice20copy_from_slice_implhEB4_",
+      "vaddr": "0x42101290",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 126,
+      "name": "_RNvNvNtCskSW6hGJTADm_4core5slice20copy_from_slice_impl17len_mismatch_fail",
+      "vaddr": "0x421012e4",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 127,
+      "name": "_RNvNvNvNvNtCskSW6hGJTADm_4core5slice20copy_from_slice_impl17len_mismatch_fail8do_panic7runtime",
+      "vaddr": "0x421012f4",
+      "intent_class": "Unknown",
+      "capability_requirements": [
+        "OBSERVE"
+      ]
+    },
+    {
+      "intent_id": 128,
+      "name": "_RNvNtNtCskSW6hGJTADm_4core3str5count14do_count_chars",
+      "vaddr": "0x42101324",
+      "intent_class": "Unknown",
       "capability_requirements": [
         "OBSERVE"
       ]

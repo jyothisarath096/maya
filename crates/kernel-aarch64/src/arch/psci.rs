@@ -53,6 +53,7 @@ pub extern "C" fn ap_entry_rust(cpu: u64) -> ! {
     crate::uart_print!("\n");
 
     crate::arch::timer::init_ap();
+    crate::arch::timer::enable_ap_timer();
     unsafe {
         core::arch::asm!(
             "msr daifclr, #2",
