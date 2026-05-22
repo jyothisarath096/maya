@@ -8,6 +8,7 @@ use super::{
     balance, policy,
     process::{Process, ProcessClass, ProcessState},
 };
+use crate::cap::IntentClass;
 
 pub struct PerCoreQueue {
     pub processes: Vec<Process>,
@@ -34,6 +35,9 @@ pub fn init() {
 
 pub fn init_core(core_id: u8) {
     let mut q = CORE_QUEUES[core_id as usize].lock();
+    if q.is_some() {
+        return;
+    }
     let mut processes = Vec::new();
     if core_id != 0 {
         processes.push(Process::new(core_id as u16, ProcessClass::Idle, 0.0));
@@ -57,6 +61,18 @@ pub fn add_process(process: Process) {
 
 pub fn add_process_to_core(core_id: u8, process: Process) {
     let mut q = CORE_QUEUES[core_id as usize].lock();
+    if q.is_none() {
+        let mut processes = Vec::new();
+        if core_id != 0 {
+            processes.push(Process::new(core_id as u16, ProcessClass::Idle, 0.0));
+        }
+        *q = Some(PerCoreQueue {
+            processes,
+            current_pid: None,
+            tick_count: 0,
+            core_id,
+        });
+    }
     if let Some(ref mut queue) = *q {
         queue.processes.push(process);
     }
@@ -195,6 +211,28 @@ pub fn choose_next_process(current_pid: Option<u16>) -> Option<u16> {
         policy::run_policy_for_core(&mut queue.processes, tick);
     }
 
+    let mut forced_io: Option<(u16, u64)> = None;
+    for process in queue.processes.iter() {
+        if process.state != ProcessState::Ready && process.state != ProcessState::Running {
+            continue;
+        }
+        if Some(process.pid) == current_pid || process.pid == 0 {
+            continue;
+        }
+        if process.intent_class == IntentClass::IO && process.stats.ticks_waiting >= 8 {
+            let candidate = (process.pid, process.stats.ticks_waiting);
+            if forced_io
+                .as_ref()
+                .is_none_or(|(best_pid, waiting)| {
+                    candidate.1 > *waiting
+                        || (candidate.1 == *waiting && process.pid < *best_pid)
+                })
+            {
+                forced_io = Some(candidate);
+            }
+        }
+    }
+
     let mut best: Option<(u16, f32)> = None;
     for process in queue.processes.iter() {
         if process.state != ProcessState::Ready && process.state != ProcessState::Running {
@@ -216,7 +254,9 @@ pub fn choose_next_process(current_pid: Option<u16>) -> Option<u16> {
         }
     }
 
-    let selected = best.map(|(pid, _)| pid)?;
+    let selected = forced_io
+        .map(|(pid, _)| pid)
+        .or_else(|| best.map(|(pid, _)| pid))?;
     if let Some(current_pid) = current_pid {
         if current_pid != selected {
             if let Some(current_process) = queue.processes.iter().find(|process| process.pid == current_pid) {

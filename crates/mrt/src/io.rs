@@ -9,11 +9,12 @@ impl MrtFile {
     pub fn stdout() -> Option<MrtFile> {
         unsafe {
             let (cap_lo, cap_hi) = crate::sys::syscall3(0x115, 0, 0, 0);
-            if cap_lo < 0 {
-                return None;
-            }
             Some(MrtFile {
-                cap: (cap_hi as u128) << 64 | cap_lo as u128,
+                cap: if cap_lo < 0 {
+                    0
+                } else {
+                    (cap_hi as u128) << 64 | cap_lo as u128
+                },
                 offset: 0,
             })
         }

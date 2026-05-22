@@ -28,7 +28,11 @@ pub mod uart;
 
 struct BumpAllocator;
 
-const HEAP_SIZE: usize = 1024 * 1024;
+// The kernel still uses a simple bump allocator, and boot-time process loading
+// allocates transient Vec-backed segment copies plus one 64 KiB user stack per
+// userspace process. With 13 processes those boot allocations exhaust 1 MiB
+// long before the system settles, because dealloc is intentionally a no-op.
+const HEAP_SIZE: usize = 8 * 1024 * 1024;
 
 #[repr(align(16))]
 struct Heap([u8; HEAP_SIZE]);
@@ -90,6 +94,12 @@ const MRT_ANALYST_MSHM: &[u8] =
     include_bytes!("../../../userspace/mrt_analyst/mrt_analyst.mshm");
 const MRT_ANALYST_MLMB: &[u8] =
     include_bytes!("../../../userspace/mrt_analyst/mrt_analyst.mlmb");
+const MRT_WATCHDOG_MEXE: &[u8] =
+    include_bytes!("../../../userspace/mrt_watchdog/mrt_watchdog.mexe");
+const MRT_WATCHDOG_MSHM: &[u8] =
+    include_bytes!("../../../userspace/mrt_watchdog/mrt_watchdog.mshm");
+const MRT_WATCHDOG_MLMB: &[u8] =
+    include_bytes!("../../../userspace/mrt_watchdog/mrt_watchdog.mlmb");
 
 #[global_allocator]
 static GLOBAL_ALLOCATOR: BumpAllocator = BumpAllocator;
@@ -380,6 +390,23 @@ pub extern "C" fn kernel_main() -> ! {
         crate::sched::process::ProcessClass::Batch,
         0.5,
     );
+    let watchdog_pid = crate::proc::launch_agentic_aarch64(
+        "mrt_watchdog",
+        MRT_WATCHDOG_MEXE,
+        MRT_WATCHDOG_MSHM,
+        MRT_WATCHDOG_MLMB,
+        false,
+    )
+    .expect("mrt_watchdog launch");
+    crate::proc::add_process_to_core(
+        1,
+        watchdog_pid,
+        crate::sched::process::ProcessClass::Interactive,
+        0.25,
+    );
+    let (_wd_send, _wd_recv) =
+        crate::ipc::channel::create_channel(watchdog_pid, mrt_pid)
+            .expect("watchdog-hello channel");
 
     crate::uart_print!("IPC channel created: producer=");
     crate::uart_print_usize!(producer_pid as usize);
@@ -393,7 +420,7 @@ pub extern "C" fn kernel_main() -> ! {
     crate::uart_print!("\n");
     crate::uart_print!("Core assignments:\n");
     crate::uart_print!("  Core 0: producer+consumer\n");
-    crate::uart_print!("  Core 1: mrt_hello+mrt_logger+mrt_shell\n");
+    crate::uart_print!("  Core 1: mrt_hello+mrt_logger+mrt_shell+mrt_watchdog\n");
     crate::uart_print!("  Core 2: compute\n");
     crate::uart_print!("  Core 3: io\n");
     crate::uart_print!("  Core 4: background+mrt_analyst\n");
@@ -401,7 +428,7 @@ pub extern "C" fn kernel_main() -> ! {
     crate::uart_print!("  Core 6: net\n");
     crate::uart_print!("  Core 7: sort\n");
 
-    crate::uart_print!("12 processes launched\n");
+    crate::uart_print!("13 processes launched\n");
     crate::gpu::canvas::render_frame();
     crate::gpu::flush_all();
     let process_count = crate::sched::queue::process_count();

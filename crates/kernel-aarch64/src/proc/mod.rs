@@ -17,7 +17,7 @@ use crate::{
 const MAX_PROCESSES: usize = 32;
 const MAX_CAPS_PER_PROC: usize = 16;
 const MAX_SEGMENTS_PER_PROC: usize = 8;
-const MAX_INTENTS_PER_PROC: usize = 16;
+const MAX_INTENTS_PER_PROC: usize = 64;
 const MAX_ALLOCATIONS_PER_PROC: usize = 16;
 const MAX_PAGES_PER_ALLOCATION: usize = 32;
 const MAX_NAME_LEN: usize = 32;

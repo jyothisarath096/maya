@@ -1,6 +1,6 @@
 use core::sync::atomic::Ordering;
 
-pub const MAX_SNAP_PROCS: usize = 12;
+pub const MAX_SNAP_PROCS: usize = 16;
 pub const MAX_SNAP_FILES: usize = 40;
 
 #[derive(Copy, Clone)]
@@ -267,23 +267,16 @@ fn write_fs_entries() {
 }
 
 pub fn emit_frame() {
-    if crate::uart::UART_LOCK
-        .compare_exchange(false, true, Ordering::Acquire, Ordering::Relaxed)
-        .is_err()
-    {
-        return;
-    }
-
-    uart_byte(0x02);
-    uart_bytes(b"MAYA");
-    uart_bytes(b"{\"t\":");
-    uart_u64(crate::arch::timer::current_tick());
-    write_processes();
-    write_rewards();
-    write_fs_entries();
-    uart_byte(b'}');
-    uart_byte(0x03);
-    uart_byte(b'\n');
-
-    crate::uart::UART_LOCK.store(false, Ordering::Release);
+    crate::uart::with_lock(|| {
+        uart_byte(0x02);
+        uart_bytes(b"MAYA");
+        uart_bytes(b"{\"t\":");
+        uart_u64(crate::arch::timer::current_tick());
+        write_processes();
+        write_rewards();
+        write_fs_entries();
+        uart_byte(b'}');
+        uart_byte(0x03);
+        uart_byte(b'\n');
+    });
 }
